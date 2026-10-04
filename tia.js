@@ -53,7 +53,7 @@ const tia = (() => {
 
   // ---------- notes that open as the flight goes ----------
   function noteOpen(n) {
-    if (Date.now() >= ALL_OPEN) return true;
+    if (preview || Date.now() >= ALL_OPEN) return true;
     if (!flight.active()) return false;
     if (flight.landed()) return true;
     const idx = phases().findIndex(p => p.name === flight.phase().name);
@@ -278,13 +278,12 @@ const tia = (() => {
   }
   function schedulePhoto(first) {
     const uniOn = window.uni?.on;
-    const wait = first ? 60000 + Math.random() * 60000 : (uniOn ? 90000 + Math.random() * 90000 : 240000 + Math.random() * 300000);
+    const wait = first ? (preview ? 12000 : 60000 + Math.random() * 60000) : (uniOn ? 90000 + Math.random() * 90000 : 240000 + Math.random() * 300000);
     setTimeout(() => { if (data && timeOk()) popPhoto(); schedulePhoto(false); }, wait);
   }
-  schedulePhoto(true);
 
   screens.tia = { onShow: render };
-  previewFromUrl().then(autoUnlock).then(() => { renderCard(); checkNew(); });
+  previewFromUrl().then(autoUnlock).then(() => { renderCard(); checkNew(); schedulePhoto(true); });
   setInterval(checkNew, 5000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) checkNew(); });
   return api;
