@@ -85,7 +85,6 @@ function mapSVG() {
     <text x="128" y="46" fill="#cfe" font-size="12" font-weight="600">${esc(to)}</text>
     <defs><linearGradient id="rbw" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff4fa3"/><stop offset=".33" stop-color="#ffe14d"/><stop offset=".66" stop-color="#3cd5ff"/><stop offset="1" stop-color="#9b6bff"/></linearGradient></defs>
     <g id="plane"><path d="${PLANE}" fill="#fff"/></g>
-    ${window.tia?.heartAvailable('map') ? '<g id="mapHeart" style="cursor:pointer"><circle cx="252" cy="72" r="16" fill="transparent"/><text x="252" y="72" font-size="18" text-anchor="middle" dominant-baseline="central" class="map-heart">💖</text></g>' : ''}
     <text id="uniPlane" font-size="26" text-anchor="middle" dominant-baseline="central">🦄</text>
   </svg>`;
 }
@@ -241,7 +240,6 @@ function buildDeck() {
     const first = deck.filter(f => f.cat === 'Turbulence').slice(0, 3);
     deck = [...first, ...deck.filter(f => !first.includes(f))];
   }
-  if (window.tia?.heartAvailable('facts')) deck.splice(Math.min(2, deck.length), 0, { cat: 'Surprise', text: 'Fact: someone on the ground is very proud of you right now. Tap the heart.', heart: true });
   deckPos = 0;
 }
 function renderCats() {
@@ -256,14 +254,6 @@ function showFact() {
   t.textContent = f.text.replace('{to}', flight.state.to || 'your destination');
   t.classList.remove('fade'); void t.offsetWidth; t.classList.add('fade');
   $('#factNum').innerHTML = `<span class="fact-cat">${f.cat}</span> ${deckPos + 1} of ${deck.length}`;
-  $('#factCard .fact-heart')?.remove();
-  if (f.heart && window.tia?.heartAvailable('facts')) {
-    const h = document.createElement('button');
-    h.className = 'fact-heart';
-    h.textContent = '💖';
-    h.onclick = e => { e.stopPropagation(); tia.findHeart('facts', e.clientX, e.clientY); h.remove(); };
-    $('#factCard').appendChild(h);
-  }
 }
 $('#factCats').addEventListener('click', e => {
   const b = e.target.closest('[data-cat]');
@@ -288,11 +278,6 @@ screens.bumpy = {
   },
 };
 screens.home = { onShow() { renderFlightCard(); } };
-$('#flightCard').addEventListener('click', e => {
-  if (!e.target.closest('#mapHeart')) return;
-  window.tia?.findHeart('map', e.clientX, e.clientY);
-  $('#mapHeart')?.remove();
-});
 
 renderFlightCard();
 setInterval(() => tickFlight(false), 5000);

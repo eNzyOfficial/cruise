@@ -506,7 +506,6 @@
         <div class="royal-title">${title}</div>
         <p>${st.score} points</p>
         <button class="big-btn royal" id="ovNext">Level ${next} →</button>`, { '#ovNext': () => startLevel(next) });
-      if (window.tia?.heartAvailable('fruit')) setTimeout(() => tia.findHeart('fruit'), 1500);
       st = { ...st, done: true };
     } else if (st.moves <= 0) {
       overlay.show(`<h2>Out of moves</h2><p>${st.score} of ${goal}. So close, try again!</p>

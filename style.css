@@ -546,66 +546,11 @@ body.unicorn .game-tile, body.unicorn .card { animation: hueGlow 2s linear infin
 #tiaAnswer:focus { border-color: #ff8fc7; }
 #tiaAnswer.shake { animation: shake .4s; }
 .tia-err { color: #ff8fa3; font-weight: 600; min-height: 24px; margin-top: 10px; }
-.tia-hero { display: flex; align-items: center; gap: 12px; }
-.tia-hero img { width: 110px; cursor: pointer; filter: drop-shadow(0 6px 12px #000a); }
-.tia-hero img.boing { animation: wiggleDog .5s; }
-.tia-hero h1 { margin: 0; font-size: 28px; background: linear-gradient(90deg, #ffc4e6, #c9a8ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.tia-hero p { margin: 2px 0 0; color: var(--muted); }
-.tia-notes { display: flex; flex-direction: column; gap: 8px; }
-.tia-note { display: flex; align-items: center; gap: 12px; text-align: left; padding: 12px 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); }
-.tia-note span { font-size: 24px; }
-.tia-note div { flex: 1; display: flex; flex-direction: column; }
-.tia-note small { color: var(--muted); font-size: 13px; }
-.tia-note.locked { opacity: .55; }
-.tia-note.new { border-color: #ff8fc7; box-shadow: 0 0 14px #ff6bb555; }
-.tia-note em { font-style: normal; font-size: 11px; font-weight: 800; text-transform: uppercase; background: #ff4f8b; color: #fff; padding: 2px 7px; border-radius: 6px; }
-.tia-tip { color: var(--muted); font-size: 13px; text-align: center; margin: 12px 4px 0; }
-.tia-hearts { display: grid; grid-template-columns: 1fr; gap: 6px; }
-.tia-heart { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); }
-.tia-heart span { font-size: 22px; }
-.tia-heart small { color: #c2ccda; font-size: 14px; }
-.tia-heart.got { border-color: #ff8fc7; } .tia-heart.got small { color: #ff8fc7; font-weight: 700; }
-.tia-hearts + .big-btn { margin-top: 10px; background: linear-gradient(135deg, #ff8fc7, #c9a8ff); color: #2a0a3d; }
-.tia-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.tia-grid button { display: flex; flex-direction: column; text-align: left; gap: 4px; padding: 14px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); }
-.tia-grid span { font-size: 28px; } .tia-grid small { color: var(--muted); font-size: 12px; }
-.tia-coupons { display: flex; flex-direction: column; gap: 8px; }
-.tia-coupon { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; border: 2px dashed var(--line); background: var(--surface); }
-.tia-coupon span { font-size: 26px; }
-.tia-coupon div { display: flex; flex-direction: column; }
-.tia-coupon small { color: var(--muted); font-size: 12px; }
-.tia-coupon.got { border-color: #ffd166; background: linear-gradient(135deg, #3a2a10, #2a1a3a); }
-.tia-coupon.got small { color: #ffd166; }
-.tia-cm { display: flex; flex-direction: column; gap: 8px; }
-.tia-cm-row { display: flex; gap: 12px; padding: 12px 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); }
-.tia-cm-row span { font-size: 24px; } .tia-cm-row div { display: flex; flex-direction: column; } .tia-cm-row small { color: #b7c2d3; font-size: 14px; }
-.letter { text-align: left; background: #fff8ee; color: #3a2a3a; border-radius: 14px; padding: 18px 18px 20px; margin-bottom: 14px; max-height: 60vh; overflow-y: auto;
-  box-shadow: inset 0 0 0 1px #e8d9c4; font-family: "Noteworthy", "Bradley Hand", "Segoe Print", cursive; }
-.letter-title { font-size: 24px; font-weight: 700; margin-bottom: 10px; color: #7a2a6a; }
-.letter-text { font-size: 18px; line-height: 1.5; }
-body.unicorn .letter { -webkit-text-fill-color: initial; }
-.compliment { font-size: 24px; font-weight: 700; line-height: 1.35; margin: 10px 0 20px; }
-.quiz-q { font-size: 22px !important; margin: 8px 0 16px !important; }
-.quiz-opts { display: flex; flex-direction: column; gap: 8px; }
-.quiz-opts button { padding: 14px; border-radius: 12px; background: var(--surface2); border: 1px solid var(--line); font-weight: 600; font-size: 16px; }
-.quiz-opts button.right { background: #1f7a4d; border-color: #5dff9a; }
-.quiz-opts button.wrong { background: #7a1f3a; border-color: #ff8fa3; }
-.tia-why { background: #3a1840; border: 1px solid #8a3f8f; border-radius: 12px; padding: 10px 12px; margin: 0 0 12px; font-weight: 700; color: #ffc4e6; text-align: left; font-size: 14px; }
-.tia-why span { display: block; font-weight: 500; color: #f3dcef; margin-top: 4px; }
+
 .fact-card { position: relative; }
-.fact-heart { position: absolute; right: 16px; top: 14px; font-size: 32px; animation: envBounce 1.2s ease-in-out infinite; }
-.map-heart { animation: none; }
-#mapHeart text { animation: envBounce 1.4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
-.tia-banner { position: fixed; left: 16px; right: 16px; top: calc(var(--st) + 10px); z-index: 97; display: flex; flex-direction: column; align-items: flex-start; text-align: left;
-  padding: 12px 16px 12px 52px; border-radius: 16px; background: linear-gradient(135deg, #ff8fc7, #c9a8ff); color: #2a0a3d; box-shadow: 0 10px 30px #0008; font-size: 26px;
-  animation: bannerIn .5s cubic-bezier(.34,1.56,.64,1); }
-.tia-banner::first-letter { position: absolute; }
-.tia-banner b { font-size: 16px; } .tia-banner small { font-size: 13px; }
-.tia-banner { background-image: linear-gradient(135deg, #ff8fc7, #c9a8ff); }
+
 @keyframes bannerIn { from { transform: translateY(-120%); } }
-.tia-banner { flex-direction: row; align-items: center; gap: 12px; padding: 12px 16px; font-size: 16px; }
-.tia-banner > span { font-size: 28px; }
-.tia-banner div { display: flex; flex-direction: column; }
+
 .tia-photo { position: fixed; left: 50%; top: 50%; z-index: 98; width: min(78vw, 300px); padding: 10px 10px 14px; background: #fff; border-radius: 6px; color: #2a1a2a;
   box-shadow: 0 20px 50px #000c; display: flex; flex-direction: column; align-items: center; gap: 4px;
   transform: translate(-50%, -50%) rotate(var(--r)); animation: photoIn .6s cubic-bezier(.34,1.56,.64,1); }
@@ -627,5 +572,4 @@ body.unicorn .fr-gem span { animation: none; }
 body.unicorn .fr-tile:nth-child(5n) .fr-gem span { animation: jelly 2s ease-in-out infinite; }
 body.unicorn #fruit button, body.unicorn #blocks button { animation: none; }
 body.unicorn .bl-cell.on { animation: none; }
-.tia-compliment { width: 100%; display: flex; align-items: center; gap: 12px; text-align: left; padding: 14px 16px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); }
-.tia-compliment span { font-size: 28px; } .tia-compliment div { display: flex; flex-direction: column; } .tia-compliment small { color: var(--muted); font-size: 13px; }
+

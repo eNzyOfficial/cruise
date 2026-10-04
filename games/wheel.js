@@ -13,13 +13,12 @@
   };
 
   function newPuzzle() {
-    const special = !!window.tia?.wheelPending();
-    const base = special ? tia.wheelBase() : pick(WORDS.wheelBases);
+    const base = pick(WORDS.wheelBases);
     const targets = [...WORDS.common].filter(w => fits(w, base))
       .sort((a, b) => a.length - b.length || a.localeCompare(b));
     let letters;
     do { letters = shuffle([...base]); } while (letters.join('') === base);
-    st = { base, letters, targets, found: [], bonus: [], hints: {}, special };
+    st = { base, letters, targets, found: [], bonus: [], hints: {} };
     picked = [];
     save(); render();
   }
@@ -97,14 +96,12 @@
   });
 
   function finish() {
-    const special = st.special && window.tia;
-    if (special) { tia.wheelDone(); st.special = false; save(); setTimeout(() => tia.findHeart('wheel'), 1400); }
     fx.celebrate();
     if (window.uni?.on) { fx.emojiRain(['🦄', '🌈', '✨', '💖'], 50); fx.fireworks(10, 2000); }
     solved++;
     store.set('wheelSolved', solved);
     setTimeout(() => {
-      overlay.show(`<h2>All found!</h2><div class="big-word">${st.base.toUpperCase()}</div>${special ? `<div class="tia-why">💜 A puzzle from Carl<br><span>${tia.wheelWhy()}</span></div>` : ''}
+      overlay.show(`<h2>All found!</h2><div class="big-word">${st.base.toUpperCase()}</div>
       <p>${st.bonus.length ? `Plus ${st.bonus.length} bonus word${st.bonus.length > 1 ? 's' : ''}. ` : ''}Puzzles solved: ${solved}</p>
       <div class="word-chips">${st.targets.map(w => `<button data-def="${w}">${w}</button>`).join('')}</div>
       <p style="font-size:13px">Tap a word to see what it means. They're all saved in My Words.</p>
@@ -137,7 +134,7 @@
 
   if (!st) newPuzzle(); else render();
   screens.wheel = {
-    onShow() { if (!st.found.length && !st.special && window.tia?.wheelPending()) newPuzzle(); render(); },
+    onShow() { render(); },
     meta: () => solved ? `${solved} solved` : 'Find hidden words',
   };
 })();
