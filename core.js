@@ -1,6 +1,7 @@
-// Reserve these names: otherwise the browser maps window.tia to the <section id="tia"> element
-window.tia = null;
+// Reserve this name so it never resolves to a page element
 window.uni = null;
+// Clean up data from a removed feature
+try { localStorage.removeItem('cruise:tia'); } catch {}
 
 // Shared helpers: storage, navigation, overlay, toast
 const store = {

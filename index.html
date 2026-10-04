@@ -12,7 +12,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="style.css?v=24">
+<link rel="stylesheet" href="style.css?v=25">
 </head>
 <body>
 
@@ -28,8 +28,6 @@
     <div class="card flight" id="flightCard">
       <!-- filled by flight.js -->
     </div>
-
-    <button class="tia-card" id="tiaCard" hidden></button>
 
     <button class="bumpy-btn" data-go="bumpy">
       <span class="bumpy-title">It's bumpy</span>
@@ -87,7 +85,7 @@
         <div class="gt-meta" id="meta-bubbles"></div>
       </button>
     </div>
-    <p class="foot">Works offline. Airplane mode is fine.<br><span class="ver">version 24</span></p>
+    <p class="foot">Works offline. Airplane mode is fine.<br><span class="ver">version 25</span></p>
   </div>
 </section>
 
@@ -115,12 +113,6 @@
       <button data-go="fruit">Fruit Swap</button>
     </div>
   </div>
-</section>
-
-<!-- TIA -->
-<section class="screen" id="tia">
-  <div class="topbar"><button class="back" data-go="home">‹ Home</button><div class="game-title">For Tia 🤭</div><div class="chip" data-chip></div></div>
-  <div class="scroll" id="tiaBody"></div>
 </section>
 
 <!-- PASSPORT -->
@@ -258,30 +250,28 @@
 <div class="toast" id="toast"></div>
 <div class="sheet" id="sheet"><div class="sheet-card" id="sheetCard"></div></div>
 
-<script src="words.js?v=24"></script>
-<script src="core.js?v=24"></script>
-<script src="fx.js?v=24"></script>
-<script src="map.js?v=24"></script>
-<script src="facts.js?v=24"></script>
-<script src="flight.js?v=24"></script>
-<script src="games/wordle.js?v=24"></script>
-<script src="games/wheel.js?v=24"></script>
-<script src="games/blocks.js?v=24"></script>
-<script src="games/fruit.js?v=24"></script>
-<script src="games/mysteries-data.js?v=24"></script>
-<script src="games/mystery.js?v=24"></script>
-<script src="games/wordsearch.js?v=24"></script>
-<script src="games/sudoku.js?v=24"></script>
-<script src="games/merge.js?v=24"></script>
-<script src="games/bubbles.js?v=24"></script>
-<script src="passport.js?v=24"></script>
-<script src="mywords.js?v=24"></script>
-<script src="unicorn.js?v=24"></script>
-<script src="surprise.enc.js?v=24"></script>
-<script src="tia.js?v=24"></script>
+<script src="words.js?v=25"></script>
+<script src="core.js?v=25"></script>
+<script src="fx.js?v=25"></script>
+<script src="map.js?v=25"></script>
+<script src="facts.js?v=25"></script>
+<script src="flight.js?v=25"></script>
+<script src="games/wordle.js?v=25"></script>
+<script src="games/wheel.js?v=25"></script>
+<script src="games/blocks.js?v=25"></script>
+<script src="games/fruit.js?v=25"></script>
+<script src="games/mysteries-data.js?v=25"></script>
+<script src="games/mystery.js?v=25"></script>
+<script src="games/wordsearch.js?v=25"></script>
+<script src="games/sudoku.js?v=25"></script>
+<script src="games/merge.js?v=25"></script>
+<script src="games/bubbles.js?v=25"></script>
+<script src="passport.js?v=25"></script>
+<script src="mywords.js?v=25"></script>
+<script src="unicorn.js?v=25"></script>
 <script>
   // Always check for a new version on open, and reload once it has taken over so updates show up straight away
-  window.APP_VERSION = 24;
+  window.APP_VERSION = 25;
   if ('serviceWorker' in navigator) {
     const hadController = !!navigator.serviceWorker.controller;
     navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(reg => {

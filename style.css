@@ -524,40 +524,16 @@ body.unicorn .game-tile, body.unicorn .card { animation: hueGlow 2s linear infin
 @keyframes breathe { 50% { scale: 1.015; } }
 
 /* ---------- For Tia 💜 ---------- */
-.tia-card { width: 100%; margin-top: 14px; display: flex; align-items: center; gap: 12px; text-align: left; padding: 16px; border-radius: var(--radius);
-  background: linear-gradient(135deg, #3a1840, #2a1a4a); border: 1px solid #8a3f8f; }
-.tia-card[hidden] { display: none; }
-.tia-card .tia-env { font-size: 30px; }
-.tia-card div { flex: 1; display: flex; flex-direction: column; }
-.tia-card b { font-size: 18px; color: #ffc4e6; }
-.tia-card small { color: #d9a8d6; font-size: 13px; }
-.tia-card i { font-style: normal; color: #d9a8d6; font-size: 22px; }
-.tia-card em { font-style: normal; background: #ff4f8b; color: #fff; font-weight: 800; border-radius: 99px; min-width: 26px; height: 26px; display: grid; place-items: center; font-size: 14px; }
-.tia-card.glow { animation: tiaGlow 1.6s ease-in-out infinite; }
-.tia-card.glow .tia-env { animation: envBounce 1.6s ease-in-out infinite; }
+
 @keyframes tiaGlow { 50% { box-shadow: 0 0 22px #ff6bb588; border-color: #ff8fc7; } }
 @keyframes envBounce { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg) scale(1.15); } }
-.tia-lock { text-align: center; padding: 20px 6px; }
-.tia-lock-dog { width: 150px; filter: drop-shadow(0 6px 14px #000a); }
-.tia-lock h2 { margin: 10px 0 4px; font-size: 26px; }
-.tia-lock p { color: var(--muted); margin: 0 0 6px; }
-.tia-lock b { display: block; font-size: 18px; margin-bottom: 12px; }
-#tiaAnswer { width: 100%; font-size: 20px; text-align: center; color: var(--text); background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; margin-bottom: 10px; outline: none; }
-#tiaAnswer:focus { border-color: #ff8fc7; }
-#tiaAnswer.shake { animation: shake .4s; }
+
 .tia-err { color: #ff8fa3; font-weight: 600; min-height: 24px; margin-top: 10px; }
 
 .fact-card { position: relative; }
 
 @keyframes bannerIn { from { transform: translateY(-120%); } }
 
-.tia-photo { position: fixed; left: 50%; top: 50%; z-index: 98; width: min(78vw, 300px); padding: 10px 10px 14px; background: #fff; border-radius: 6px; color: #2a1a2a;
-  box-shadow: 0 20px 50px #000c; display: flex; flex-direction: column; align-items: center; gap: 4px;
-  transform: translate(-50%, -50%) rotate(var(--r)); animation: photoIn .6s cubic-bezier(.34,1.56,.64,1); }
-.tia-photo img { width: 100%; border-radius: 3px; display: block; }
-.tia-photo b { font-size: 26px; margin-top: 6px; font-family: "Noteworthy", "Bradley Hand", system-ui; }
-.tia-photo small { color: #8a7a8a; font-size: 13px; }
-.tia-photo.out { animation: photoOut .4s ease-in forwards; }
 @keyframes photoIn { from { transform: translate(-50%, 60%) rotate(-25deg) scale(.4); opacity: 0; } }
 @keyframes photoOut { to { transform: translate(-50%, -50%) rotate(20deg) scale(.2); opacity: 0; } }
 
@@ -572,7 +548,6 @@ body.unicorn .fr-gem span { animation: none; }
 body.unicorn .fr-tile:nth-child(5n) .fr-gem span { animation: jelly 2s ease-in-out infinite; }
 body.unicorn #fruit button, body.unicorn #blocks button { animation: none; }
 body.unicorn .bl-cell.on { animation: none; }
-
 
 /* ---------- home tiles for new games ---------- */
 .ws-art { display: grid; grid-template-columns: repeat(3, 20px); gap: 3px; }
