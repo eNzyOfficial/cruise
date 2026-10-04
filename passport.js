@@ -215,80 +215,123 @@ AKL|Auckland|NZ|-37.01|174.79`.split('\n').map(l => { const [c, city, cc, la, lo
   }
 
   // ---------- scanning ----------
-  let zxing;
-  function loadZXing() {
-    return zxing ||= new Promise((res, rej) => {
-      if (window.ZXing) return res(window.ZXing);
-      const s = document.createElement('script');
-      s.src = 'vendor/zxing.min.js';
-      s.onload = () => res(window.ZXing); s.onerror = rej;
-      document.head.appendChild(s);
+  // Main reader: zxing-cpp compiled to WebAssembly (strong on rotated/skewed codes).
+  // Backup: the older JavaScript reader, which occasionally reads a photo the main one misses.
+  const FORMATS = ['PDF417', 'Aztec', 'QRCode', 'DataMatrix'];
+  let wasmReady, jsReady;
+  const loadScript = src => new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
+  function loadWasm() {
+    return wasmReady ||= loadScript('vendor/zxing-wasm.js').then(() => {
+      ZXingWASM.prepareZXingModule({ overrides: { locateFile: (p, prefix) => p.endsWith('.wasm') ? 'vendor/zxing_reader.wasm' : prefix + p } });
+      return ZXingWASM;
     });
   }
-  async function reader() {
-    const Z = await loadZXing();
-    const hints = new Map();
-    hints.set(Z.DecodeHintType.POSSIBLE_FORMATS, [Z.BarcodeFormat.PDF_417, Z.BarcodeFormat.AZTEC, Z.BarcodeFormat.QR_CODE, Z.BarcodeFormat.DATA_MATRIX]);
-    hints.set(Z.DecodeHintType.TRY_HARDER, true);
-    return { Z, r: new Z.BrowserMultiFormatReader(hints) };
+  const loadJS = () => jsReady ||= loadScript('vendor/zxing.min.js').then(() => window.ZXing);
+  const isPass = t => /^[MS][1-9]/.test(t || '');
+
+  async function readWasm(input, opts = {}) {
+    const Z = await loadWasm();
+    const res = await Z.readBarcodes(input, { tryHarder: true, tryRotate: true, tryInvert: false, tryDownscale: true, formats: FORMATS, maxNumberOfSymbols: 2, ...opts });
+    return res.find(r => r.isValid && isPass(r.text))?.text;
+  }
+  async function readJS(img) {
+    const Z = await loadJS();
+    const hints = new Map([[Z.DecodeHintType.TRY_HARDER, true], [Z.DecodeHintType.POSSIBLE_FORMATS, [Z.BarcodeFormat.PDF_417, Z.BarcodeFormat.AZTEC, Z.BarcodeFormat.QR_CODE, Z.BarcodeFormat.DATA_MATRIX]]]);
+    const W = img.naturalWidth, H = img.naturalHeight;
+    for (const rot of [0, 90, 270]) {
+      const c = document.createElement('canvas');
+      c.width = rot ? H : W; c.height = rot ? W : H;
+      const g = c.getContext('2d', { willReadFrequently: true });
+      g.translate(c.width / 2, c.height / 2); g.rotate(rot * Math.PI / 180); g.drawImage(img, -W / 2, -H / 2);
+      for (const B of [Z.HybridBinarizer, Z.GlobalHistogramBinarizer]) {
+        try {
+          const r = new Z.MultiFormatReader(); r.setHints(hints);
+          const t = r.decode(new Z.BinaryBitmap(new B(new Z.HTMLCanvasElementLuminanceSource(c))), hints).getText();
+          if (isPass(t)) return t;
+        } catch {}
+      }
+      await new Promise(r => setTimeout(r, 0)); // keep the screen responsive
+    }
   }
 
+  const TIPS = `<ul class="bp-tips">
+      <li>📱 <b>App or email boarding pass:</b> take a screenshot, then choose it. Works best.</li>
+      <li>🎫 <b>Paper boarding pass:</b> use the camera. Lay it flat in good light and hold the phone close so the barcode fills the box.</li>
+      <li>Photos taken from far away or at an angle often can't be read.</li></ul>`;
+
   function chooser() {
-    overlay.show(`<div class="ev-icon">🎫</div><h2>Add boarding pass</h2><p>Scan the barcode, or pick a screenshot of your mobile boarding pass.</p>
-      <button class="big-btn" id="bpCam">📷 Scan with camera</button>
-      <button class="big-btn alt" id="bpPic">🖼️ Choose screenshot</button>
+    overlay.show(`<div class="ev-icon">🎫</div><h2>Add boarding pass</h2>
+      <button class="big-btn" id="bpPic">🖼️ Choose screenshot</button>
+      <button class="big-btn alt" id="bpCam">📷 Scan paper pass with camera</button>
+      ${TIPS}
       <button class="fc-quit" id="ovNo">Cancel</button>`, { '#ovNo': () => {} });
     $('#bpCam').onclick = () => { overlay.hide(); camera(); };
     $('#bpPic').onclick = () => { overlay.hide(); $('#bpFile').click(); };
-    loadZXing().catch(() => {});
+    loadWasm().catch(() => {});
+  }
+  function failed(msg) {
+    overlay.show(`<div class="ev-icon">🤔</div><h2>${msg}</h2>${TIPS}
+      <button class="big-btn" id="bpAgain">Try again</button><button class="fc-quit" id="ovNo">Cancel</button>`, { '#ovNo': () => {} });
+    $('#bpAgain').onclick = chooser;
   }
 
-  // Decode a picked screenshot/photo. Try the full image, then the middle and lower parts, then a few scales.
   async function fromFile(file) {
     if (!file) return;
-    toast('Reading boarding pass…');
+    overlay.show(`<div class="ev-icon spin">🎫</div><h2>Reading boarding pass…</h2>`, {});
     try {
-      const { Z } = await reader();
+      let text = await readWasm(file);
       const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = URL.createObjectURL(file); });
-      const hints = new Map([[Z.DecodeHintType.TRY_HARDER, true], [Z.DecodeHintType.POSSIBLE_FORMATS, [Z.BarcodeFormat.PDF_417, Z.BarcodeFormat.AZTEC, Z.BarcodeFormat.QR_CODE, Z.BarcodeFormat.DATA_MATRIX]]]);
-      const multi = new Z.MultiFormatReader(); multi.setHints(hints);
-      const W = img.naturalWidth, H = img.naturalHeight;
-      const crops = [[0, 0, 1, 1], [0, 0.25, 1, 0.5], [0, 0.45, 1, 0.55], [0, 0, 1, 0.5], [0.1, 0.3, 0.8, 0.45]];
-      for (const scale of [1, 0.6, 1.5]) for (const [x, y, w, h] of crops) {
+      if (!text) {
+        // second try: grey, high-contrast copy
         const c = document.createElement('canvas');
-        c.width = Math.round(W * w * scale); c.height = Math.round(H * h * scale);
+        c.width = img.naturalWidth; c.height = img.naturalHeight;
         const g = c.getContext('2d', { willReadFrequently: true });
-        g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height);
-        g.drawImage(img, W * x, H * y, W * w, H * h, 0, 0, c.width, c.height);
-        try {
-          const src = new Z.HTMLCanvasElementLuminanceSource(c);
-          const res = multi.decode(new Z.BinaryBitmap(new Z.HybridBinarizer(src)), hints);
-          return addFromBarcode(res.getText());
-        } catch {}
+        g.filter = 'grayscale(1) contrast(1.7)'; g.drawImage(img, 0, 0);
+        text = await readWasm(g.getImageData(0, 0, c.width, c.height));
       }
-      toast('Couldn\'t find a barcode. Try a clearer screenshot.');
-    } catch { toast('Couldn\'t read that image'); }
+      if (!text) text = await readJS(img);
+      overlay.hide();
+      if (text) addFromBarcode(text);
+      else failed('Couldn\'t find the barcode');
+    } catch { overlay.hide(); failed('Couldn\'t read that image'); }
   }
 
+  // Live camera: grab frames several times a second and try each one
   async function camera() {
     const box = document.createElement('div');
     box.className = 'scanner';
-    box.innerHTML = `<video playsinline muted></video><div class="scan-frame"><i></i></div>
-      <p>Point at the barcode on the boarding pass</p><button class="big-btn alt" id="scanStop">Cancel</button>`;
+    box.innerHTML = `<video playsinline muted autoplay></video><div class="scan-frame"><i></i></div>
+      <p>Fill the box with the barcode<br><small>Flat, good light, hold steady</small></p><button class="big-btn alt" id="scanStop">Cancel</button>`;
     document.body.appendChild(box);
-    let controls;
-    const stop = () => { try { controls?.stop(); } catch {} box.remove(); };
+    const video = $('video', box);
+    let stream, alive = true;
+    const stop = () => { alive = false; stream?.getTracks().forEach(t => t.stop()); box.remove(); };
     $('#scanStop').onclick = stop;
     try {
-      const { r } = await reader();
-      controls = await r.decodeFromConstraints({ video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } }, $('video', box), (result) => {
-        if (!result) return;
-        stop();
-        addFromBarcode(result.getText());
-      });
+      await loadWasm();
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false });
+      video.srcObject = stream;
+      await video.play();
     } catch {
       stop();
-      toast('Camera not available. Try a screenshot instead.');
+      return failed('Camera not available');
+    }
+    const c = document.createElement('canvas'), g = c.getContext('2d', { willReadFrequently: true });
+    let n = 0;
+    while (alive) {
+      const vw = video.videoWidth, vh = video.videoHeight;
+      if (vw) {
+        // alternate between the middle of the picture (where the box is) and the whole frame
+        const full = n++ % 3 === 2;
+        const cw = full ? vw : Math.round(vw * 0.85), ch = full ? vh : Math.round(vh * 0.6);
+        c.width = cw; c.height = ch;
+        g.drawImage(video, (vw - cw) / 2, (vh - ch) / 2, cw, ch, 0, 0, cw, ch);
+        try {
+          const text = await readWasm(g.getImageData(0, 0, cw, ch), { tryDownscale: true, maxNumberOfSymbols: 1 });
+          if (text && alive) { haptic(); stop(); addFromBarcode(text); return; }
+        } catch {}
+      }
+      await new Promise(r => setTimeout(r, 120));
     }
   }
 

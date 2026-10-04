@@ -801,3 +801,7 @@ body.unicorn .pp-emblem { border-color: #fff; }
 @keyframes scanline { from { top: 8%; } to { top: 92%; } }
 .scanner p { position: relative; color: #fff; font-weight: 600; text-shadow: 0 1px 4px #000; }
 .scanner .big-btn { position: relative; max-width: 300px; }
+.bp-tips { text-align: left; margin: 14px 0 6px; padding: 0 0 0 4px; list-style: none; font-size: 14px; color: #c2ccda; }
+.bp-tips li { margin: 8px 0; line-height: 1.4; }
+.ev-icon.spin { animation: spin 1.2s linear infinite; display: inline-block; }
+.scanner p small { font-weight: 400; opacity: .85; }
