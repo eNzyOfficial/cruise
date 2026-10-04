@@ -23,6 +23,9 @@ const fx = (() => {
   const U = () => window.uni?.on;
   const col = c => (U() && Math.random() < 0.7 ? pick(RBW) : c);
   const more = n => (U() ? Math.round(n * 2) : n);
+  // Unicorn mode mixes in photo stickers (the dog!) wherever emoji fly
+  const stickers = [];
+  const sticker = () => (U() && stickers.length && Math.random() < 0.3 ? pick(stickers) : null);
   const add = p => { if (parts.length < MAX) parts.push({ born: performance.now(), rot: 0, vr: 0, g: 0, drag: 1, ...p }); start(); };
 
   function star(x, y, r, rot) {
@@ -79,8 +82,13 @@ const fx = (() => {
     } else if (p.kind === 'emoji') {
       ctx.globalAlpha = Math.min(1, fade * 2);
       ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
-      ctx.font = `${p.size}px system-ui`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText(p.char, 0, 0);
+      if (p.img) {
+        const w = p.size * 2.2, h = w * p.img.naturalHeight / p.img.naturalWidth;
+        ctx.drawImage(p.img, -w / 2, -h / 2, w, h);
+      } else {
+        ctx.font = `${p.size}px system-ui`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(p.char, 0, 0);
+      }
       ctx.restore();
     } else if (p.kind === 'bolt') {
       ctx.globalAlpha = fade;
@@ -127,8 +135,9 @@ const fx = (() => {
       p.vx *= Math.pow(p.drag, dt); p.vy *= Math.pow(p.drag, dt);
       p.x += p.vx * dt; p.y += p.vy * dt;
       p.rot += p.vr * dt;
+      if (!Number.isFinite(p.x) || !Number.isFinite(p.y)) { parts.splice(i, 1); continue; }
       ctx.globalCompositeOperation = p.kind === 'glitter' ? 'source-over' : 'lighter';
-      draw(p, t);
+      try { draw(p, t); } catch { parts.splice(i, 1); }
     }
     ctx.globalAlpha = 1;
     if (parts.length) requestAnimationFrame(loop);
@@ -137,6 +146,7 @@ const fx = (() => {
   function start() { if (!running) { running = true; requestAnimationFrame(loop); } }
 
   const api = {
+    addSticker(src) { const im = new Image(); im.src = src; stickers.push(im); return im; },
     sparkle(x, y, color = '#ffd166', n = 8, speed = 4) {
       for (let i = 0; i < more(n); i++) {
         const a = Math.random() * Math.PI * 2, v = speed * (0.4 + Math.random());
@@ -185,6 +195,8 @@ const fx = (() => {
       api.ring(x, y, color, 22 + 14 * power, 3, 420);
     },
     firework(x, y, color) {
+      if (!Number.isFinite(x)) x = W * (0.15 + Math.random() * 0.7);
+      if (!Number.isFinite(y)) y = H * (0.12 + Math.random() * 0.35);
       color ||= pick(['#ff6b9d', '#ffd166', '#7ee3c8', '#b28dff', '#7cb4ff', '#ff9f5a']);
       add({ kind: 'rocket', x, y: H + 10, vx: (Math.random() - 0.5) * 1.5, vy: -(Math.sqrt(2 * 0.22 * (H + 10 - y))), g: 0.22, drag: 1, color,
         life: 1000 * Math.sqrt(2 * (H + 10 - y) / 0.22) / 60 / 1.0,
@@ -202,14 +214,14 @@ const fx = (() => {
     },
     emojiRain(chars = ['👑', '💎', '✨', '💖'], n = 24) {
       for (let i = 0; i < n; i++) {
-        add({ kind: 'emoji', char: pick(chars), x: Math.random() * W, y: -30 - Math.random() * 200, vx: (Math.random() - 0.5) * 1.5, vy: 2 + Math.random() * 3,
+        add({ kind: 'emoji', char: pick(chars), img: sticker(), x: Math.random() * W, y: -30 - Math.random() * 200, vx: (Math.random() - 0.5) * 1.5, vy: 2 + Math.random() * 3,
           g: 0.08, drag: 0.995, size: 22 + Math.random() * 20, life: 2200 + Math.random() * 1000, rot: (Math.random() - 0.5), vr: (Math.random() - 0.5) * 0.08 });
       }
     },
     emojiBurst(x, y, chars, n = 10) {
       for (let i = 0; i < n; i++) {
         const a = Math.random() * Math.PI * 2, v = 4 + Math.random() * 6;
-        add({ kind: 'emoji', char: pick(chars), x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 3, g: 0.22, drag: 0.98, size: 20 + Math.random() * 18, life: 1100 + Math.random() * 500, rot: 0, vr: (Math.random() - 0.5) * 0.3 });
+        add({ kind: 'emoji', char: pick(chars), img: sticker(), x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 3, g: 0.22, drag: 0.98, size: 20 + Math.random() * 18, life: 1100 + Math.random() * 500, rot: 0, vr: (Math.random() - 0.5) * 0.3 });
       }
     },
     bolt(x0, y0, x1, y1, color = '#bde0ff') {
