@@ -668,3 +668,97 @@ body.unicorn #wsearch, body.unicorn #sudoku, body.unicorn #merge, body.unicorn #
 body.unicorn #sudoku button, body.unicorn #bubbles .bb, body.unicorn #wsearch button { animation: none; }
 body.unicorn .sd-c.sel { background: #ff6bf066; }
 body.unicorn .ws-grid, body.unicorn .sd-grid { border-color: #ff6bf0; box-shadow: 0 0 20px #ff6bf077; }
+
+/* ---------- Detective Desk ---------- */
+.mys-art { font-size: 40px; position: relative; } .mys-art span { font-size: 22px; position: absolute; right: 30%; bottom: 8px; transform: rotate(20deg); }
+.mys-body { padding-bottom: 20px; }
+.mys-hero { display: flex; align-items: center; gap: 14px; margin: 4px 0 6px; }
+.mys-hero > span { font-size: 46px; }
+.mys-hero h1 { margin: 0; font-size: 26px; font-family: ui-serif, "New York", Georgia, serif; }
+.mys-hero p { margin: 2px 0 0; color: var(--muted); }
+.mys-case, .case-person { width: 100%; display: flex; align-items: center; gap: 12px; text-align: left; padding: 14px; border-radius: 16px; margin-bottom: 8px;
+  background: linear-gradient(135deg, #2a2216, #1d1a14); border: 1px solid #5a4a2a; }
+.mys-case > span, .case-person > span { font-size: 30px; }
+.mys-case div, .case-person div { flex: 1; display: flex; flex-direction: column; }
+.mys-case b { font-family: ui-serif, "New York", Georgia, serif; font-size: 18px; color: #f3e3c3; }
+.mys-case small, .case-person small { color: #bfae8a; font-size: 13px; }
+.mys-case i, .case-person i { font-style: normal; color: #bfae8a; font-size: 22px; }
+.case-person { background: var(--surface); border-color: var(--line); }
+.case-person b { font-size: 17px; }
+.case-person small { color: var(--muted); }
+.case-person em { font-style: normal; background: var(--warm); color: #1a1406; font-weight: 800; border-radius: 99px; min-width: 24px; height: 24px; display: grid; place-items: center; font-size: 13px; }
+.mys-minis { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mys-mini { display: flex; align-items: center; gap: 8px; text-align: left; padding: 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); }
+.mys-mini em { font-style: normal; color: var(--muted); font-size: 12px; font-weight: 700; min-width: 16px; }
+.mys-mini b { flex: 1; font-size: 14px; font-family: ui-serif, "New York", Georgia, serif; }
+.mys-mini.right span { color: #5dff9a; font-weight: 800; } .mys-mini.wrong span { color: #ff8fa3; font-weight: 800; }
+.mys-tip { color: var(--muted); font-size: 13px; text-align: center; margin: 14px 4px; }
+.mys-back { color: var(--accent); font-size: 15px; padding: 4px 0 10px; }
+.mys-num { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+.mys-title { font-family: ui-serif, "New York", Georgia, serif; font-size: 30px; margin: 4px 0 12px; }
+.mys-story { font-family: ui-serif, "New York", Georgia, serif; font-size: 18px; line-height: 1.6; color: #e9e2d4; background: #1b1914; border: 1px solid #3a3426; border-radius: 14px; padding: 4px 18px; }
+.mys-story p { margin: 14px 0; }
+.mys-story mark { background: #ffd16655; color: #fff; border-radius: 4px; padding: 0 3px; box-shadow: 0 0 0 2px #ffd16655; }
+.mys-q { font-size: 18px; margin: 18px 0 10px; }
+.mys-opts { display: flex; flex-direction: column; gap: 8px; }
+.mys-opts button { text-align: left; padding: 14px; border-radius: 12px; background: var(--surface2); border: 1px solid var(--line); font-size: 16px; font-weight: 500; }
+.mys-opts.small { flex-direction: row; flex-wrap: wrap; }
+.mys-opts.small button { padding: 10px 12px; font-size: 14px; }
+.mys-opts button.sel { background: var(--accent); color: #06101f; border-color: var(--accent); font-weight: 700; }
+.mys-opts button.right { background: #1f7a4d; border-color: #5dff9a; }
+.mys-opts button.wrong { background: #7a1f3a; border-color: #ff8fa3; }
+.mys-opts button.dim { opacity: .4; }
+.mys-reveal { margin: 14px 0; padding: 14px 16px; border-radius: 14px; border: 1px solid; }
+.mys-reveal.good { background: #12301f; border-color: #2f7a4d; } .mys-reveal.bad { background: #2a1a10; border-color: #7a4a1f; }
+.mys-reveal p { margin: 6px 0 0; line-height: 1.5; }
+.case-tabs { display: flex; gap: 4px; overflow-x: auto; padding: 0 12px 8px; scrollbar-width: none; flex: none; }
+.case-tabs::-webkit-scrollbar { display: none; }
+.case-tabs button { flex: none; padding: 8px 12px; border-radius: 99px; background: var(--surface); border: 1px solid var(--line); font-size: 14px; font-weight: 600; color: #c2ccda; }
+.case-tabs button.on { background: var(--warm); color: #1a1406; border-color: var(--warm); }
+.case-intro { font-family: ui-serif, "New York", Georgia, serif; font-size: 17px; line-height: 1.6; color: #e9e2d4; }
+.case-progress { display: flex; gap: 8px; margin: 12px 0; }
+.case-progress div { flex: 1; text-align: center; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 8px 4px; }
+.case-progress b { display: block; font-size: 20px; } .case-progress small { color: var(--muted); font-size: 11px; }
+.case-how { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; margin-bottom: 14px; }
+.case-how p { margin: 6px 0; font-size: 14px; color: #c2ccda; }
+.case-solved { background: #3a2f10; border: 1px solid #ffd166; color: #ffd166; padding: 10px 14px; border-radius: 12px; font-weight: 700; margin-bottom: 10px; }
+.case-solved button { color: #fff; text-decoration: underline; }
+.case-who { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.case-who span { font-size: 40px; } .case-who div { display: flex; flex-direction: column; } .case-who b { font-size: 20px; } .case-who small { color: var(--muted); }
+.case-chat { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.case-chat .q { align-self: flex-end; max-width: 85%; background: var(--accent); color: #06101f; padding: 9px 13px; border-radius: 16px 16px 4px 16px; font-weight: 600; font-size: 15px; }
+.case-chat .a { align-self: flex-start; max-width: 90%; background: var(--surface2); padding: 10px 13px; border-radius: 16px 16px 16px 4px; font-size: 16px; line-height: 1.45; font-family: ui-serif, "New York", Georgia, serif; }
+.case-chat .a.claim { border: 1px solid #ffd16688; }
+.case-chat .a.caught { border-color: #ff6b81; opacity: .8; }
+.case-chat .challenge { display: block; margin-top: 8px; padding: 7px 12px; border-radius: 99px; background: #ffd166; color: #1a1406; font-weight: 800; font-size: 13px; font-family: system-ui; }
+.lie-tag { display: inline-block; margin-top: 6px; font-family: system-ui; font-size: 12px; font-weight: 900; color: #ff6b81; letter-spacing: 1px; }
+.case-ask { display: flex; flex-direction: column; gap: 6px; }
+.case-ask small { color: var(--muted); font-size: 12px; }
+.case-ask button { text-align: left; padding: 12px 14px; border-radius: 12px; background: var(--surface); border: 1px dashed #4a5568; font-size: 15px; }
+.ev-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 12px; }
+.ev-pick button { display: flex; align-items: center; gap: 8px; text-align: left; padding: 10px; border-radius: 10px; background: var(--surface2); border: 1px solid var(--line); font-size: 13px; font-weight: 600; }
+.ev-pick button span { font-size: 22px; }
+.ev-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ev-grid button { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 16px 8px; border-radius: 14px; background: linear-gradient(160deg, #f3e9d2, #e2d3b0); color: #3a2f1a; box-shadow: 0 4px 10px #0006; transform: rotate(-1deg); }
+.ev-grid button:nth-child(2n) { transform: rotate(1.2deg); }
+.ev-grid button span { font-size: 34px; } .ev-grid button b { font-family: ui-serif, Georgia, serif; font-size: 15px; } .ev-grid button small { font-size: 12px; color: #7a5a2a; }
+.ev-icon { font-size: 48px; }
+.ev-text { text-align: left; font-family: ui-serif, "New York", Georgia, serif; font-size: 17px !important; line-height: 1.5; color: var(--text) !important; }
+.case-unlocked { text-align: left; background: var(--surface2); border-radius: 12px; padding: 10px 12px; margin-bottom: 14px; font-size: 14px; }
+.case-unlocked div { padding: 3px 0; }
+.case-notes { display: flex; flex-direction: column; gap: 8px; }
+.case-notes div { display: flex; gap: 10px; background: #1b1914; border: 1px solid #3a3426; border-radius: 12px; padding: 10px 12px; }
+.case-notes p { margin: 0; font-family: ui-serif, Georgia, serif; font-size: 15px; line-height: 1.45; color: #e9e2d4; }
+.case-solution { text-align: left; max-height: 55vh; overflow-y: auto; font-family: ui-serif, "New York", Georgia, serif; font-size: 16px; line-height: 1.55; }
+.cipher-text { font-family: ui-monospace, Menlo, monospace; font-size: 15px; line-height: 1.6; letter-spacing: 1px; background: #1b1914; border: 1px solid #3a3426; border-radius: 12px; padding: 12px; margin: 10px 0; text-align: left; color: #bfae8a; word-break: break-word; }
+.cipher-text.ok { color: #5dff9a; border-color: #2f7a4d; }
+.cipher-dial { display: flex; align-items: center; justify-content: center; gap: 18px; margin-bottom: 14px; }
+.cipher-dial button { width: 52px; height: 52px; border-radius: 50%; background: var(--surface2); font-size: 26px; font-weight: 700; }
+.cipher-dial div { display: flex; flex-direction: column; align-items: center; } .cipher-dial small { color: var(--muted); font-size: 12px; } .cipher-dial b { font-size: 34px; font-variant-numeric: tabular-nums; }
+.objection { position: fixed; left: 50%; top: 40%; z-index: 99; pointer-events: none; white-space: nowrap; font-weight: 900; font-size: 44px; font-style: italic; letter-spacing: -1px;
+  color: #fff; -webkit-text-stroke: 2px #b0102a; text-shadow: 4px 4px 0 #b0102a, 0 0 30px #ff4f6d; animation: objection 1.3s cubic-bezier(.34,1.8,.64,1) forwards; }
+@keyframes objection { 0% { transform: translate(-50%, -50%) scale(3) rotate(-12deg); opacity: 0; } 15% { transform: translate(-50%, -50%) scale(1) rotate(-6deg); opacity: 1; } 80% { opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1.1) rotate(-6deg); opacity: 0; } }
+.det-dog { position: relative; width: 130px; margin: 0 auto 4px; }
+.det-dog img { width: 130px; }
+.det-dog span { position: absolute; top: -18px; left: 34px; font-size: 52px; transform: rotate(-12deg); }
+body.unicorn #mystery, body.unicorn #case { animation: rainbowBg 6s ease infinite; filter: none; transform: none; }

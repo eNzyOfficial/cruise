@@ -12,7 +12,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="style.css?v=15">
+<link rel="stylesheet" href="style.css?v=16">
 </head>
 <body>
 
@@ -59,6 +59,11 @@
         <div class="gt-art fruit-art">🍓🍋🍇<br>🍊🍓🍏</div>
         <div class="gt-name">Fruit Swap</div>
         <div class="gt-meta" id="meta-fruit"></div>
+      </button>
+      <button class="game-tile" data-go="mystery">
+        <div class="gt-art mys-art">🕵️<span>🔍</span></div>
+        <div class="gt-name">Detective Desk</div>
+        <div class="gt-meta" id="meta-mystery"></div>
       </button>
       <button class="game-tile" data-go="wsearch">
         <div class="gt-art ws-art"><i>C</i><i class="h">A</i><i>T</i><i class="h">S</i><i>U</i><i class="h">U</i><i>N</i><i class="h">N</i><i>D</i></div>
@@ -160,6 +165,17 @@
   </div>
 </section>
 
+<!-- DETECTIVE DESK -->
+<section class="screen" id="mystery">
+  <div class="topbar"><button class="back" data-go="home">‹ Home</button><div class="game-title">Detective Desk</div><div class="chip" data-chip></div></div>
+  <div class="scroll"><div id="mysBody" class="mys-body"></div></div>
+</section>
+<section class="screen" id="case">
+  <div class="topbar"><button class="back" data-go="mystery">‹ Desk</button><div class="game-title" id="caseTitle"></div><div class="chip" data-chip></div></div>
+  <div class="case-tabs" id="caseTabs"></div>
+  <div class="scroll"><div id="caseBody" class="mys-body"></div></div>
+</section>
+
 <!-- WORD SEARCH -->
 <section class="screen" id="wsearch">
   <div class="topbar"><button class="back" data-go="home">‹ Home</button><div class="game-title">Word Search</div><div class="chip" data-chip></div></div>
@@ -235,23 +251,25 @@
 <div class="toast" id="toast"></div>
 <div class="sheet" id="sheet"><div class="sheet-card" id="sheetCard"></div></div>
 
-<script src="words.js?v=15"></script>
-<script src="core.js?v=15"></script>
-<script src="fx.js?v=15"></script>
-<script src="facts.js?v=15"></script>
-<script src="flight.js?v=15"></script>
-<script src="games/wordle.js?v=15"></script>
-<script src="games/wheel.js?v=15"></script>
-<script src="games/blocks.js?v=15"></script>
-<script src="games/fruit.js?v=15"></script>
-<script src="games/wordsearch.js?v=15"></script>
-<script src="games/sudoku.js?v=15"></script>
-<script src="games/merge.js?v=15"></script>
-<script src="games/bubbles.js?v=15"></script>
-<script src="mywords.js?v=15"></script>
-<script src="unicorn.js?v=15"></script>
-<script src="surprise.enc.js?v=15"></script>
-<script src="tia.js?v=15"></script>
+<script src="words.js?v=16"></script>
+<script src="core.js?v=16"></script>
+<script src="fx.js?v=16"></script>
+<script src="facts.js?v=16"></script>
+<script src="flight.js?v=16"></script>
+<script src="games/wordle.js?v=16"></script>
+<script src="games/wheel.js?v=16"></script>
+<script src="games/blocks.js?v=16"></script>
+<script src="games/fruit.js?v=16"></script>
+<script src="games/mysteries-data.js?v=16"></script>
+<script src="games/mystery.js?v=16"></script>
+<script src="games/wordsearch.js?v=16"></script>
+<script src="games/sudoku.js?v=16"></script>
+<script src="games/merge.js?v=16"></script>
+<script src="games/bubbles.js?v=16"></script>
+<script src="mywords.js?v=16"></script>
+<script src="unicorn.js?v=16"></script>
+<script src="surprise.enc.js?v=16"></script>
+<script src="tia.js?v=16"></script>
 <script>
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 </script>
