@@ -4,7 +4,6 @@ const tia = (() => {
   const S = window.SURPRISE;
   if (!S) return { ready: false, heartAvailable: () => false };
   const AT = Date.parse(S.at);
-  const ALL_OPEN = Date.parse('2026-10-04T23:00:00+07:00'); // every note opens by late tonight anyway
   const HEARTS = ['map', 'facts', 'wordle', 'wheel', 'fruit'];
   const card = $('#tiaCard'), body = $('#tiaBody');
   let data = null;
@@ -52,8 +51,21 @@ const tia = (() => {
   }
 
   // ---------- notes that open as the flight goes ----------
+  // Notes reset for every flight: progress is tied to the flight's start time
+  function syncFlight() {
+    const id = flight.state.start || null;
+    if (st.flightId !== id) { st.flightId = id; if (id) { st.read = []; st.notified = []; } save(); }
+  }
+  // Which version of a note: flying to Carl (Chiang Mai), heading home (Bangkok), or anywhere else
+  function noteFor(n) {
+    const to = flight.state.to || '';
+    const mode = /chiang\s*mai|cnx/i.test(to) ? 'toCarl' : /bangkok|bkk|dmk|don mueang|suvarnabhumi/i.test(to) ? 'toHome' : 'other';
+    const v = { ...n, ...(n.variants?.[mode] || {}) };
+    const fill = t => t.replaceAll('{to}', to || 'your destination');
+    return { ...v, title: fill(v.title), text: fill(v.text) };
+  }
   function noteOpen(n) {
-    if (preview || Date.now() >= ALL_OPEN) return true;
+    if (preview) return true;
     if (!flight.active()) return false;
     if (flight.landed()) return true;
     const idx = phases().findIndex(p => p.name === flight.phase().name);
@@ -144,10 +156,11 @@ const tia = (() => {
       <div class="tia-notes">${[data.welcome, ...data.notes].map((n, i) => {
         const open = i === 0 || noteOpen(n);
         const isNew = i > 0 && open && !st.read.includes(n.id);
+        const shown = i === 0 ? n : noteFor(n);
         return `<button class="tia-note ${open ? 'open' : 'locked'} ${isNew ? 'new' : ''}" data-note="${i}">
-          <span>${open ? (isNew ? '💌' : '📖') : '🔒'}</span><div><b>${open ? html(n.title) : 'Sealed'}</b><small>${i === 0 ? 'Start here' : html(n.label)}</small></div>${isNew ? '<em>new</em>' : ''}</button>`;
+          <span>${open ? (isNew ? '💌' : '📖') : '🔒'}</span><div><b>${open ? html(shown.title) : 'Sealed'}</b><small>${i === 0 ? 'Start here' : html(n.label)}</small></div>${isNew ? '<em>new</em>' : ''}</button>`;
       }).join('')}</div>
-      ${!flight.active() ? '<p class="tia-tip">Notes open as your flight goes. Tap <b>Start</b> on the home screen when the plane starts moving.</p>' : ''}
+      ${!flight.active() && !preview ? '<p class="tia-tip">Notes open as your flight goes, every flight. Tap <b>Start</b> on the home screen when the plane starts moving.</p>' : ''}
 
       <h2 class="section-title">Heart hunt 💖 ${st.hearts.length}/5</h2>
       <div class="tia-hearts">${HEARTS.map(h => `<div class="tia-heart ${st.hearts.includes(h) ? 'got' : ''}"><span>${st.hearts.includes(h) ? '💖' : '🤍'}</span><small>${st.hearts.includes(h) ? 'Found!' : html(data.hearts.hints[h])}</small></div>`).join('')}</div>
@@ -163,7 +176,8 @@ const tia = (() => {
       const n = i === 0 ? data.welcome : data.notes[i - 1];
       if (i > 0 && !noteOpen(n)) { toast(`Opens: ${n.label.toLowerCase()}`); return; }
       if (i > 0 && !st.read.includes(n.id)) { st.read.push(n.id); save(); renderCard(); }
-      letter(n.title, n.text);
+      const shown = i === 0 ? n : noteFor(n);
+      letter(shown.title, shown.text);
     });
     $('#tiaFinal')?.addEventListener('click', () => letter(data.hearts.final.title, data.hearts.final.text));
     $('#tiaCompliment').onclick = e => {
@@ -202,6 +216,7 @@ const tia = (() => {
 
   // new notes pop up wherever she is
   function checkNew() {
+    syncFlight();
     renderCard();
     if (!data) return;
     for (const n of data.notes) {
@@ -210,7 +225,7 @@ const tia = (() => {
         const el = document.createElement('button');
         el.className = 'tia-banner';
         el.innerHTML = `<span>💌</span><div><b>New note from Carl</b><small>${html(n.label)}</small></div>`;
-        el.onclick = () => { el.remove(); st.read.includes(n.id) || st.read.push(n.id); save(); renderCard(); letter(n.title, n.text); };
+        el.onclick = () => { el.remove(); st.read.includes(n.id) || st.read.push(n.id); save(); renderCard(); const v = noteFor(n); letter(v.title, v.text); };
         document.body.appendChild(el);
         setTimeout(() => el.remove(), 9000);
         fx.emojiBurst(innerWidth / 2, 80, ['💌', '💜', '✨'], 10);
