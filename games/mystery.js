@@ -87,7 +87,7 @@
   function progressHTML() {
     return `<div class="case-progress">
       <div><b>${S.lies.length}/${C.lies.length}</b><small>lies caught</small></div>
-      <div><b>${S.cracked ? '✓' : '?'}</b><small>code cracked</small></div>
+      <div><b>${S.cracked ? '✓' : '?'}</b><small>${C.cipher ? 'code cracked' : 'puzzle solved'}</small></div>
       <div><b>${S.mistakes}</b><small>wrong challenges</small></div></div>`;
   }
 
@@ -97,9 +97,9 @@
       ${progressHTML()}
       <div class="case-how"><b>How to play</b>
         <p>🗣️ <b>People:</b> ask questions. Answers marked ⚡ are claims you can challenge.</p>
-        <p>🔎 <b>Evidence:</b> look closely. Some things only show up after someone cracks.</p>
+        <p>🔎 <b>Evidence:</b> look closely. Some things only show up after someone cracks, and one of them is a puzzle.</p>
         <p>⚡ <b>Challenge</b> a claim by presenting the evidence that proves it false.</p>
-        <p>⚖️ <b>Accuse</b> when you know who, how and why.</p></div>
+        <p>⚖️ <b>Accuse</b> when you think you know the whole story.</p></div>
       <button class="big-btn" id="caseStart">${S.asked.length ? 'Keep investigating' : 'Start investigating'}</button>`;
     $('#caseStart').onclick = () => { tab = 'people'; renderCase(); };
     $('#caseSolution')?.addEventListener('click', showSolution);
@@ -140,7 +140,7 @@
       <div class="ev-pick">${visibleEvidence().map(([k, e]) => `<button data-ev="${k}"><span>${e.icon}</span>${esc(e.name)}</button>`).join('')}</div>
       <button class="big-btn alt" id="ovNo">Never mind</button>`, { '#ovNo': () => {} });
     $$('#overlayCard [data-ev]').forEach(b => b.onclick = e => {
-      const lie = C.lies.find(l => l.talk === talk.id && l.evidence === b.dataset.ev);
+      const lie = C.lies.find(l => l.talk === talk.id && [].concat(l.evidence).includes(b.dataset.ev));
       overlay.hide();
       if (lie) caughtLie(lie, e);
       else {
@@ -173,10 +173,11 @@
 
   function tabEvidence() {
     caseBody.innerHTML = progressHTML() + `<div class="ev-grid">${visibleEvidence().map(([k, e]) =>
-      `<button data-ev="${k}" class="${e.cipher && !S.cracked ? 'locked' : ''}"><span>${e.icon}</span><b>${esc(e.name)}</b>${e.cipher && !S.cracked ? '<small>Coded 🔐</small>' : ''}</button>`).join('')}</div>`;
+      `<button data-ev="${k}" class="${(e.cipher || e.puzzle) && !S.cracked ? 'locked' : ''}"><span>${e.icon}</span><b>${esc(e.name)}</b>${(e.cipher || e.puzzle) && !S.cracked ? `<small>${e.cipher ? 'Coded 🔐' : 'Puzzle 🧩'}</small>` : ''}</button>`).join('')}</div>`;
     $$('[data-ev]', caseBody).forEach(b => b.onclick = () => {
       const e = C.evidence[b.dataset.ev];
       if (e.cipher) return cipher(e);
+      if (e.puzzle) return puzzle(e);
       overlay.show(`<div class="ev-icon">${e.icon}</div><h2>${esc(e.name)}</h2><p class="ev-text">${esc(e.text)}</p><button class="big-btn" id="ovOk">Close</button>`, { '#ovOk': () => {} });
     });
   }
@@ -207,11 +208,38 @@
     draw();
   }
 
+  // Type-the-answer puzzles (acrostics, number codes…)
+  function puzzle(e) {
+    const P = C.puzzle;
+    const norm = t => t.toLowerCase().replace(/[^a-z]/g, '');
+    overlay.show(`<div class="ev-icon">${e.icon}</div><h2>${esc(e.name)}</h2><p class="ev-text">${esc(e.text)}</p>
+      <div class="cipher-text ${S.cracked ? 'ok' : ''}" style="white-space:pre-line">${esc(P.shown)}</div>
+      ${S.cracked ? `<p><b>Solved:</b> ${esc(P.note)}</p>` : `<p><b>${esc(P.prompt)}</b></p>
+      <input id="pzIn" class="pz-input" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="go" placeholder="Your answer">
+      <div class="tia-err" id="pzErr"></div><button class="big-btn" id="pzGo">Check</button>`}
+      <button class="big-btn alt" id="ovOk">Close</button>`, { '#ovOk': renderCase });
+    const go = () => {
+      if (P.answers.some(a => norm(a) === norm($('#pzIn').value))) {
+        S.cracked = true; saveCase();
+        overlay.hide();
+        fx.flash('#ffd166', 0.4); fx.confetti(80);
+        if (window.uni?.on) uni.phrase(innerWidth / 2, innerHeight * 0.3, 'big brain 🧠');
+        toast('🧩 Puzzle solved!');
+        setTimeout(() => puzzle(e), 300);
+      } else {
+        $('#pzErr').textContent = 'Not quite. Look again.';
+        $('#pzIn').classList.remove('shake'); void $('#pzIn').offsetWidth; $('#pzIn').classList.add('shake');
+      }
+    };
+    $('#pzGo')?.addEventListener('click', go);
+    $('#pzIn')?.addEventListener('keydown', ev => { if (ev.key === 'Enter') go(); });
+  }
+
   function tabNotes() {
     const notes = [];
     for (const id of S.asked) { const t = C.talks.find(x => x.id === id); if (t?.note) notes.push(['🗣️', t.note]); }
     for (const id of S.lies) { const l = C.lies.find(x => x.id === id); notes.push(['⚡', l.reveal]); }
-    if (S.cracked) notes.push(['🔓', C.cipher.note]);
+    if (S.cracked) notes.push(['🔓', (C.cipher || C.puzzle).note]);
     caseBody.innerHTML = progressHTML() + (notes.length ? `<div class="case-notes">${notes.map(([i, n]) => `<div><span>${i}</span><p>${esc(n)}</p></div>`).join('')}</div>`
       : '<p class="mys-tip">Your notebook fills in as you find things out. Go and talk to people!</p>');
   }

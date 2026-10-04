@@ -762,3 +762,5 @@ body.unicorn .ws-grid, body.unicorn .sd-grid { border-color: #ff6bf0; box-shadow
 .det-dog img { width: 130px; }
 .det-dog span { position: absolute; top: -18px; left: 34px; font-size: 52px; transform: rotate(-12deg); }
 body.unicorn #mystery, body.unicorn #case { animation: rainbowBg 6s ease infinite; filter: none; transform: none; }
+.pz-input { width: 100%; font-size: 20px; text-align: center; color: var(--text); background: var(--surface2); border: 1px solid var(--line); border-radius: 12px; padding: 12px; outline: none; }
+.pz-input.shake { animation: shake .4s; }

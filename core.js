@@ -25,6 +25,7 @@ const screens = {};
 const nav = {
   current: 'home',
   go(id) {
+    overlay.hide();
     $$('.screen').forEach(s => s.classList.toggle('active', s.id === id));
     nav.current = id;
     screens[id]?.onShow?.();
