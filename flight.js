@@ -2,7 +2,7 @@
 const THAI = /chiang|bangkok|phuket|krabi|samui|pattaya|hat yai|udon|thai|chiang rai|hua hin/i;
 
 const flight = {
-  get state() { return { start: null, duration: 90, from: 'Bangkok', to: 'Chiang Mai', ...store.get('flight', {}) }; },
+  get state() { return { start: null, duration: 90, from: 'Bangkok', to: 'Chiang Mai', fromCode: 'BKK', toCode: 'CNX', ...store.get('flight', {}) }; },
   set state(v) { store.set('flight', v); },
   update(patch) { this.state = { ...this.state, ...patch }; },
   elapsedMin() { const s = this.state; return s.start ? (Date.now() - s.start) / 60000 : 0; },
@@ -72,7 +72,10 @@ const ROUTE = 'M 200 178 C 215 120, 100 110, 112 42';
 
 function mapSVG() {
   const { from, to } = flight.state;
-  return `<svg viewBox="0 0 300 210" preserveAspectRatio="xMidYMid meet">
+  const follow = store.get('mapFollow', false);
+  return `<canvas class="geo-canvas"></canvas>
+    <button class="map-btn" id="mapFollow" title="Zoom">${follow ? '🌏' : '🔍'}</button>
+    <svg class="map-fallback" viewBox="0 0 300 210" preserveAspectRatio="xMidYMid meet">
     <g fill="#1a2c45" opacity=".9">
       <path d="M40 70 L70 30 L95 70 Z"/><path d="M75 70 L105 22 L135 70 Z" opacity=".7"/><path d="M128 70 L150 40 L172 70 Z" opacity=".5"/>
     </g>
@@ -141,13 +144,36 @@ function renderFlightCard() {
     $('#durMinus').onclick = () => setDur(flight.state.duration - 5);
     $('#durPlus').onclick = () => setDur(flight.state.duration + 5);
     const saveRoute = () => {
-      flight.update({ from: $('#flFrom').value.trim() || 'Here', to: $('#flTo').value.trim() || 'There' });
-      renderRouteLabel();
-      const svg = $('#flightCard .fl-map');
-      svg.innerHTML = mapSVG(); placePlane(0);
+      const fa = geoMap.airport($('#flFrom').value) || geoMap.byCity($('#flFrom').value);
+      const ta = geoMap.airport($('#flTo').value) || geoMap.byCity($('#flTo').value);
+      flight.update({
+        from: fa?.city || $('#flFrom').value.trim() || 'Here', fromCode: fa?.code || null,
+        to: ta?.city || $('#flTo').value.trim() || 'There', toCode: ta?.code || null,
+      });
+      if (fa && ta) flight.update({ duration: Math.max(45, Math.round((geoMap.km(fa, ta) / 780 * 60 + 30) / 5) * 5) });
+      renderFlightCard();
     };
-    $('#flFrom').onchange = saveRoute;
-    $('#flTo').onchange = saveRoute;
+    for (const id of ['flFrom', 'flTo']) {
+      const inp = $('#' + id);
+      const box = document.createElement('div');
+      box.className = 'ac-list';
+      inp.parentElement.appendChild(box);
+      inp.addEventListener('input', () => {
+        const hits = geoMap.search(inp.value);
+        box.innerHTML = hits.map(a => `<button data-code="${a.code}"><b>${esc(a.city)}</b> <span>${a.code}</span><small>${esc(a.name)}</small></button>`).join('');
+      });
+      box.addEventListener('pointerdown', e => {
+        const b = e.target.closest('[data-code]');
+        if (!b) return;
+        e.preventDefault();
+        inp.value = geoMap.airport(b.dataset.code).city;
+        box.innerHTML = '';
+        inp.blur();
+        saveRoute();
+      });
+      inp.addEventListener('blur', () => setTimeout(() => { box.innerHTML = ''; }, 150));
+      inp.onchange = saveRoute;
+    }
     $$('.route-inputs input').forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') i.blur(); }));
     $('#flBP').onclick = () => passport.chooser();
     $('#flStart').onclick = e => { window.uni?.boom(e.clientX, e.clientY, true); flight.update({ start: Date.now() }); renderFlightCard(); };
@@ -175,8 +201,9 @@ function renderFlightCard() {
       <div class="fl-sub" id="flSub"></div>
       <div class="fl-bar"><i id="flBar"></i></div>
       <div class="fl-ends"><span id="flDep"></span><span id="flArr"></span></div>
+      <div class="fl-gps" id="flGpsLine"></div>
       <div id="flPhase"></div>
-      <div class="fl-tools"><button id="flLess">−5 min</button><button id="flAdd">+5 min</button><button id="flLess30">−30</button><button id="flAdd30">+30</button><button id="flReset">Reset</button></div>
+      <div class="fl-tools"><button id="flGPS">${geoMap.gpsOn ? '📍 GPS on' : '📍 Real position'}</button><button id="flLess">−5 min</button><button id="flAdd">+5 min</button><button id="flLess30">−30</button><button id="flAdd30">+30</button><button id="flReset">Reset</button></div>
     </div>`;
   const adjust = d => { flight.update({ duration: Math.max(Math.ceil(flight.elapsedMin()) + 1, flight.state.duration + d) }); tickFlight(true); };
   $('#flLess').onclick = () => adjust(-5);
@@ -184,16 +211,57 @@ function renderFlightCard() {
   $('#flLess30').onclick = () => adjust(-30);
   $('#flAdd30').onclick = () => adjust(30);
   $('#flReset').onclick = resetFlight;
+  $('#flGPS').onclick = toggleGPS;
   tickFlight(true);
+}
+
+// Real position from the phone's GPS. Works in airplane mode, best at a window seat. Never leaves the phone.
+function toggleGPS() {
+  if (geoMap.gpsOn) { geoMap.gpsStop(); store.set('gpsOn', false); toast('GPS off'); renderFlightCard(); return; }
+  store.set('gpsOn', true);
+  startGPS();
+  toast('Looking for GPS… a window seat helps');
+  renderFlightCard();
+}
+function startGPS() {
+  geoMap.gpsStart((fix, err) => {
+    if (err && err.code === 1) { store.set('gpsOn', false); geoMap.gpsStop(); toast('Location permission was declined'); renderFlightCard(); return; }
+    tickFlight(true);
+  });
+}
+function gpsLine() {
+  const el = $('#flGpsLine');
+  if (!el) return;
+  if (!geoMap.gpsOn) { el.textContent = ''; return; }
+  const f = geoMap.gpsFix();
+  const dest = geoMap.airport(routeCodes()[1]);
+  if (!f) { el.innerHTML = '📍 <span>Looking for GPS… a window seat helps</span>'; return; }
+  const bits = [];
+  if (f.alt != null) bits.push(`${Math.round(f.alt).toLocaleString()} m`);
+  if (f.speed != null) bits.push(`${Math.round(f.speed * 3.6)} km/h`);
+  if (dest) bits.push(`${Math.round(geoMap.km(f, dest)).toLocaleString()} km to ${dest.city}`);
+  el.innerHTML = `📍 <b>GPS</b> <span>${bits.join(' · ') || 'position found'}</span>`;
 }
 
 function resetFlight() {
   overlay.show(`<h2>Reset flight?</h2><p>This clears the countdown.</p>
     <button class="big-btn" id="ovYes">Reset</button><button class="big-btn alt" id="ovNo">Cancel</button>`,
-    { '#ovYes': () => { flight.update({ start: null }); renderFlightCard(); renderChips(); }, '#ovNo': () => {} });
+    { '#ovYes': () => { geoMap.gpsStop(); store.set('gpsOn', false); flight.update({ start: null }); renderFlightCard(); renderChips(); }, '#ovNo': () => {} });
 }
 
+function routeCodes() {
+  const s = flight.state;
+  return [s.fromCode || geoMap.byCity(s.from)?.code, s.toCode || geoMap.byCity(s.to)?.code];
+}
 function placePlane(p) {
+  const canvas = $('#flightCard .geo-canvas');
+  if (canvas) {
+    const [from, to] = routeCodes();
+    const gps = flight.active() && !flight.landed() ? geoMap.gpsFix() : null;
+    const ok = geoMap.draw(canvas, { from, to, progress: p, gps, follow: store.get('mapFollow', false) });
+    canvas.closest('.fl-map').classList.toggle('has-geo', ok);
+    if (ok) return;
+  }
   const path = $('#flightCard #routeBase');
   const done = $('#flightCard #routeDone');
   const plane = $('#flightCard #plane');
@@ -224,6 +292,7 @@ function tickFlight(force) {
   $('#flArr').textContent = 'Lands ~' + clock(new Date(s.start + s.duration * 60000));
   const ph = flight.phase();
   if (force || ph.name !== lastPhase) { $('#flPhase').innerHTML = phaseHTML(); lastPhase = ph.name; }
+  gpsLine();
   placePlane(flight.progress());
 }
 
@@ -284,7 +353,16 @@ screens.bumpy = {
 screens.home = { onShow() { renderFlightCard(); } };
 
 renderFlightCard();
+geoMap.load().then(() => { if (nav.current === 'home' && !document.activeElement?.matches('input')) renderFlightCard(); });
+if (store.get('gpsOn', false) && flight.active() && !flight.landed()) startGPS();
 setInterval(() => tickFlight(false), 5000);
+// tap the map's zoom button to switch between the whole route and following the plane
+document.addEventListener('click', e => {
+  if (!e.target.closest('#mapFollow')) return;
+  store.set('mapFollow', !store.get('mapFollow', false));
+  e.target.closest('#mapFollow').textContent = store.get('mapFollow', false) ? '🌏' : '🔍';
+  placePlane(flight.landed() ? 1 : flight.progress());
+});
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState !== 'visible') return;
   if (nav.current === 'home' && !document.activeElement?.matches('input')) renderFlightCard(); else tickFlight(true);

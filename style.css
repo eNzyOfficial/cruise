@@ -805,3 +805,21 @@ body.unicorn .pp-emblem { border-color: #fff; }
 .bp-tips li { margin: 8px 0; line-height: 1.4; }
 .ev-icon.spin { animation: spin 1.2s linear infinite; display: inline-block; }
 .scanner p small { font-weight: 400; opacity: .85; }
+
+/* ---------- real map ---------- */
+.fl-map { position: relative; }
+.geo-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.fl-map:not(.has-geo) .geo-canvas, .fl-map:not(.has-geo) .map-btn { visibility: hidden; }
+.fl-map.has-geo .map-fallback { display: none; }
+.map-btn { position: absolute; right: 10px; top: 10px; width: 36px; height: 36px; border-radius: 50%; background: #0b1626cc; border: 1px solid #2f4566; font-size: 17px; z-index: 2; }
+.fl-gps { font-size: 13px; color: var(--teal); margin-top: 8px; min-height: 0; }
+.fl-gps:empty { display: none; }
+.fl-gps span { color: #c2ccda; }
+.route-inputs label { position: relative; }
+.ac-list { position: absolute; left: 0; right: 0; top: 100%; z-index: 20; margin-top: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; box-shadow: 0 12px 30px #000a; min-width: 220px; }
+.ac-list:empty { display: none; }
+.route-inputs label:last-child .ac-list { left: auto; right: 0; }
+.ac-list button { display: block; width: 100%; text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+.ac-list button:last-child { border-bottom: 0; }
+.ac-list b { font-size: 15px; } .ac-list span { color: var(--accent); font-weight: 700; font-size: 13px; margin-left: 4px; }
+.ac-list small { display: block; color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

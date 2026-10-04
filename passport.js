@@ -123,6 +123,7 @@ AKL|Auckland|NZ|-37.01|174.79`.split('\n').map(l => { const [c, city, cc, la, lo
     EY: 'Etihad', TK: 'Turkish Airlines', BA: 'British Airways', LH: 'Lufthansa', AF: 'Air France', KL: 'KLM', QF: 'Qantas', CI: 'China Airlines',
     BR: 'EVA Air', CZ: 'China Southern', MU: 'China Eastern', CA: 'Air China', PR: 'Philippine Airlines', '5J': 'Cebu Pacific', GA: 'Garuda Indonesia',
     AI: 'Air India', '6E': 'IndiGo', UL: 'SriLankan', FZ: 'flydubai', MM: 'Peach', '7C': 'Jeju Air', TW: 't\'way', LJ: 'Jin Air', ZG: 'ZIPAIR' };
+  const apt = code => geoMap.airport(code) || AIRPORTS[code];
   const COUNTRY_FLAG = cc => cc ? String.fromCodePoint(...[...cc].map(c => 0x1F1E6 + c.charCodeAt(0) - 65)) : '🌏';
 
   let stamps = store.get('stamps', []);
@@ -156,14 +157,14 @@ AKL|Auckland|NZ|-37.01|174.79`.split('\n').map(l => { const [c, city, cc, la, lo
   function addFromBarcode(text) {
     const p = parse(text);
     if (!p) return toast('That doesn\'t look like a boarding pass barcode');
-    const A = AIRPORTS[p.from], B = AIRPORTS[p.to];
+    const A = apt(p.from), B = apt(p.to);
     const dist = km(A, B);
     const stamp = { id: Date.now(), ...p, km: dist, mins: estMinutes(dist), style: rand(6), tilt: Math.round(Math.random() * 16 - 8) };
     const dupe = stamps.find(x => x.flight === p.flight && x.date === p.date && x.from === p.from);
     if (!dupe) { stamps.unshift(stamp); save(); }
     // set up the countdown for this flight (unless one is already running)
     if (!flight.active()) {
-      flight.update({ from: A?.city || p.from, to: B?.city || p.to, duration: stamp.mins });
+      flight.update({ from: A?.city || p.from, to: B?.city || p.to, fromCode: p.from, toCode: p.to, duration: stamp.mins });
       if (nav.current === 'home') renderFlightCard();
       renderRouteLabel();
     }
@@ -175,7 +176,7 @@ AKL|Auckland|NZ|-37.01|174.79`.split('\n').map(l => { const [c, city, cc, la, lo
   const fmtDate = iso => new Date(iso + 'T12:00:00').toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase();
   function stampSVG(s) {
     const ink = window.uni?.on ? 'url(#rainbowInk)' : INKS[s.style % INKS.length];
-    const A = AIRPORTS[s.from], B = AIRPORTS[s.to];
+    const A = apt(s.from), B = apt(s.to);
     const shape = s.style % 3;
     const frame = shape === 0
       ? `<circle cx="100" cy="100" r="92" fill="none" stroke="${ink}" stroke-width="5"/><circle cx="100" cy="100" r="80" fill="none" stroke="${ink}" stroke-width="1.5"/>`
@@ -196,10 +197,10 @@ AKL|Auckland|NZ|-37.01|174.79`.split('\n').map(l => { const [c, city, cc, la, lo
   }
 
   function showStamp(s, isNew) {
-    const B = AIRPORTS[s.to];
+    const B = apt(s.to);
     overlay.show(`<div class="stamp-drop">${stampSVG(s)}</div>
       <h2>${isNew ? 'Stamped! 🛂' : 'Already stamped'}</h2>
-      <p>${COUNTRY_FLAG(B?.cc)} ${AIRPORTS[s.from]?.city || s.from} → ${B?.city || s.to} · ${AIRLINES[s.carrier] || s.carrier} ${s.flight}${s.seat ? ` · seat ${s.seat}` : ''}</p>
+      <p>${COUNTRY_FLAG(B?.cc)} ${apt(s.from)?.city || s.from} → ${B?.city || s.to} · ${AIRLINES[s.carrier] || s.carrier} ${s.flight}${s.seat ? ` · seat ${s.seat}` : ''}</p>
       ${!flight.active() ? `<p class="stamp-set">✈️ Countdown set: ${fmtMin(s.mins)}. Tap <b>Start</b> when the plane moves.</p>` : ''}
       <button class="big-btn" id="ovOk">${isNew ? 'Nice!' : 'OK'}</button>`, { '#ovOk': () => { if (nav.current === 'passport') render(); } });
     if (isNew) {
@@ -338,7 +339,7 @@ AKL|Auckland|NZ|-37.01|174.79`.split('\n').map(l => { const [c, city, cc, la, lo
   // ---------- passport book ----------
   function stats() {
     const cities = {};
-    stamps.forEach(s => { const c = AIRPORTS[s.to]?.city || s.to; cities[c] = (cities[c] || 0) + 1; });
+    stamps.forEach(s => { const c = apt(s.to)?.city || s.to; cities[c] = (cities[c] || 0) + 1; });
     const fav = Object.entries(cities).sort((a, b) => b[1] - a[1])[0];
     return {
       flights: stamps.length,
@@ -379,7 +380,7 @@ AKL|Auckland|NZ|-37.01|174.79`.split('\n').map(l => { const [c, city, cc, la, lo
     $$('.pp-stamp', body).forEach(b => b.onclick = () => {
       const s = stamps.find(x => x.id === +b.dataset.id);
       overlay.show(`<div class="stamp-drop still">${stampSVG(s)}</div>
-        <p>${AIRPORTS[s.from]?.city || s.from} → ${AIRPORTS[s.to]?.city || s.to}<br>${AIRLINES[s.carrier] || s.carrier} ${s.flight} · ${fmtDate(s.date)}${s.seat ? ` · seat ${s.seat}` : ''}<br>${s.km ? `${s.km.toLocaleString()} km · ` : ''}~${fmtMin(s.mins)}</p>
+        <p>${apt(s.from)?.city || s.from} → ${apt(s.to)?.city || s.to}<br>${AIRLINES[s.carrier] || s.carrier} ${s.flight} · ${fmtDate(s.date)}${s.seat ? ` · seat ${s.seat}` : ''}<br>${s.km ? `${s.km.toLocaleString()} km · ` : ''}~${fmtMin(s.mins)}</p>
         <button class="big-btn" id="ovOk">Close</button><button class="fc-quit" id="ppDel">Remove this stamp</button>`, { '#ovOk': () => {} });
       $('#ppDel').onclick = () => { stamps = stamps.filter(x => x.id !== s.id); save(); overlay.hide(); render(); };
     });
