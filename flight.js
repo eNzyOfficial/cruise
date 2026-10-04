@@ -111,7 +111,9 @@ function renderFlightCard() {
     card.innerHTML = `<div class="fl-map">${mapSVG()}</div>
       <div class="fl-setup">
         <h3>Ready when you are</h3>
-        <p>Tap start when the plane starts moving. The countdown keeps going even if you close the app.</p>
+        <p>Add your boarding pass and everything sets itself up. Then tap start when the plane starts moving.</p>
+        <button class="big-btn bp-btn" id="flBP">🎫 Add boarding pass</button>
+        <details class="fl-manual"><summary>No boarding pass? Set it up by hand</summary>
         <div class="route-inputs">
           <label><small>From</small><input id="flFrom" value="${esc(s.from)}" autocomplete="off" enterkeyhint="done"></label>
           <span>→</span>
@@ -123,6 +125,7 @@ function renderFlightCard() {
           <div class="dur-presets">${PRESETS.map(m => `<button data-min="${m}">${Math.floor(m / 60)}h${m % 60 ? ' ' + (m % 60) : ''}</button>`).join('')}</div>
           <div class="dur-fine"><button id="durMinus">− 5 min</button><button id="durPlus">+ 5 min</button></div>
         </div>
+        </details>
         <button class="big-btn" id="flStart">Start · we're moving</button>
       </div>`;
     const setDur = d => {
@@ -146,6 +149,7 @@ function renderFlightCard() {
     $('#flFrom').onchange = saveRoute;
     $('#flTo').onchange = saveRoute;
     $$('.route-inputs input').forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') i.blur(); }));
+    $('#flBP').onclick = () => passport.chooser();
     $('#flStart').onclick = e => { window.uni?.boom(e.clientX, e.clientY, true); flight.update({ start: Date.now() }); renderFlightCard(); };
     placePlane(0);
     return;

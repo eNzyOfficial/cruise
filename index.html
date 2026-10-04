@@ -12,7 +12,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="style.css?v=17">
+<link rel="stylesheet" href="style.css?v=19">
 </head>
 <body>
 
@@ -36,6 +36,7 @@
       <span class="bumpy-sub">Tap for what's going on</span>
     </button>
 
+    <button class="mywords-btn pp-btn" data-go="passport"><span>🛂</span><div><b>Passport</b><small id="meta-passport">Collect stamps</small></div><i>›</i></button>
     <button class="mywords-btn" data-go="mywords"><span>📖</span><div><b>My Words</b><small id="meta-mywords">Words you've met in the games</small></div><i>›</i></button>
 
     <h2 class="section-title">Play</h2>
@@ -120,6 +121,12 @@
 <section class="screen" id="tia">
   <div class="topbar"><button class="back" data-go="home">‹ Home</button><div class="game-title">For Tia 🤭</div><div class="chip" data-chip></div></div>
   <div class="scroll" id="tiaBody"></div>
+</section>
+
+<!-- PASSPORT -->
+<section class="screen" id="passport">
+  <div class="topbar"><button class="back" data-go="home">‹ Home</button><div class="game-title">Passport</div><div class="chip" data-chip></div></div>
+  <div class="scroll"><div id="ppBody"></div></div>
 </section>
 
 <!-- MY WORDS -->
@@ -251,25 +258,26 @@
 <div class="toast" id="toast"></div>
 <div class="sheet" id="sheet"><div class="sheet-card" id="sheetCard"></div></div>
 
-<script src="words.js?v=17"></script>
-<script src="core.js?v=17"></script>
-<script src="fx.js?v=17"></script>
-<script src="facts.js?v=17"></script>
-<script src="flight.js?v=17"></script>
-<script src="games/wordle.js?v=17"></script>
-<script src="games/wheel.js?v=17"></script>
-<script src="games/blocks.js?v=17"></script>
-<script src="games/fruit.js?v=17"></script>
-<script src="games/mysteries-data.js?v=17"></script>
-<script src="games/mystery.js?v=17"></script>
-<script src="games/wordsearch.js?v=17"></script>
-<script src="games/sudoku.js?v=17"></script>
-<script src="games/merge.js?v=17"></script>
-<script src="games/bubbles.js?v=17"></script>
-<script src="mywords.js?v=17"></script>
-<script src="unicorn.js?v=17"></script>
-<script src="surprise.enc.js?v=17"></script>
-<script src="tia.js?v=17"></script>
+<script src="words.js?v=19"></script>
+<script src="core.js?v=19"></script>
+<script src="fx.js?v=19"></script>
+<script src="facts.js?v=19"></script>
+<script src="flight.js?v=19"></script>
+<script src="games/wordle.js?v=19"></script>
+<script src="games/wheel.js?v=19"></script>
+<script src="games/blocks.js?v=19"></script>
+<script src="games/fruit.js?v=19"></script>
+<script src="games/mysteries-data.js?v=19"></script>
+<script src="games/mystery.js?v=19"></script>
+<script src="games/wordsearch.js?v=19"></script>
+<script src="games/sudoku.js?v=19"></script>
+<script src="games/merge.js?v=19"></script>
+<script src="games/bubbles.js?v=19"></script>
+<script src="passport.js?v=19"></script>
+<script src="mywords.js?v=19"></script>
+<script src="unicorn.js?v=19"></script>
+<script src="surprise.enc.js?v=19"></script>
+<script src="tia.js?v=19"></script>
 <script>
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 </script>
