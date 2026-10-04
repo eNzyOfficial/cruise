@@ -1,6 +1,6 @@
 // Offline cache: everything the app needs is saved on first visit.
 // Bump VERSION whenever files change so phones pick up the update.
-const VERSION = 'cruise-v23';
+const VERSION = 'cruise-v24';
 const FILES = [
   './', 'index.html', 'style.css', 'manifest.json', 'words.js', 'defs.js', 'core.js', 'fx.js', 'map.js', 'geo.js', 'facts.js', 'flight.js', 'passport.js', 'vendor/zxing.min.js', 'vendor/zxing-wasm.js', 'vendor/zxing_reader.wasm', 'mywords.js', 'unicorn.js', 'img/dog1.png', 'img/dog2.png', 'img/dog3.png', 'surprise.enc.js', 'tia.js',
   'games/wordle.js', 'games/wheel.js', 'games/blocks.js', 'games/fruit.js', 'games/mysteries-data.js', 'games/mystery.js', 'games/wordsearch.js', 'games/sudoku.js', 'games/merge.js', 'games/bubbles.js',

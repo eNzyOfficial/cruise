@@ -154,7 +154,8 @@ AKL|Auckland|NZ|-37.01|174.79`.split('\n').map(l => { const [c, city, cc, la, lo
   // rough block time: cruise at ~780 km/h plus ~30 min for taxi, climb and descent
   const estMinutes = d => d ? Math.max(45, Math.round((d / 780 * 60 + 30) / 5) * 5) : 90;
 
-  function addFromBarcode(text) {
+  async function addFromBarcode(text) {
+    await geoMap.load();
     const p = parse(text);
     if (!p) return toast('That doesn\'t look like a boarding pass barcode');
     const A = apt(p.from), B = apt(p.to);
@@ -162,13 +163,17 @@ AKL|Auckland|NZ|-37.01|174.79`.split('\n').map(l => { const [c, city, cc, la, lo
     const stamp = { id: Date.now(), ...p, km: dist, mins: estMinutes(dist), style: rand(6), tilt: Math.round(Math.random() * 16 - 8) };
     const dupe = stamps.find(x => x.flight === p.flight && x.date === p.date && x.from === p.from);
     if (!dupe) { stamps.unshift(stamp); save(); }
-    // set up the countdown for this flight (unless one is already running)
-    if (!flight.active()) {
-      flight.update({ from: A?.city || p.from, to: B?.city || p.to, fromCode: p.from, toCode: p.to, duration: stamp.mins });
+    // Set the countdown up from the pass: route + flight time worked out from the distance.
+    // A finished (or never started) countdown is simply replaced; a running one asks first.
+    const setUp = () => {
+      flight.update({ start: null, from: A?.city || p.from, to: B?.city || p.to, fromCode: p.from, toCode: p.to, duration: stamp.mins });
+      geoMap.gpsStop(); store.set('gpsOn', false);
       if (nav.current === 'home') renderFlightCard();
-      renderRouteLabel();
-    }
-    showStamp(dupe || stamp, !dupe);
+      renderRouteLabel(); renderChips();
+    };
+    const running = flight.active() && !flight.landed();
+    if (!running) setUp();
+    showStamp(dupe || stamp, !dupe, running ? setUp : null);
   }
 
   // ---------- stamp drawing ----------
@@ -196,13 +201,16 @@ AKL|Auckland|NZ|-37.01|174.79`.split('\n').map(l => { const [c, city, cc, la, lo
       </g></svg>`;
   }
 
-  function showStamp(s, isNew) {
+  function showStamp(s, isNew, switchTo) {
     const B = apt(s.to);
     overlay.show(`<div class="stamp-drop">${stampSVG(s)}</div>
       <h2>${isNew ? 'Stamped! 🛂' : 'Already stamped'}</h2>
       <p>${COUNTRY_FLAG(B?.cc)} ${apt(s.from)?.city || s.from} → ${B?.city || s.to} · ${AIRLINES[s.carrier] || s.carrier} ${s.flight}${s.seat ? ` · seat ${s.seat}` : ''}</p>
-      ${!flight.active() ? `<p class="stamp-set">✈️ Countdown set: ${fmtMin(s.mins)}. Tap <b>Start</b> when the plane moves.</p>` : ''}
-      <button class="big-btn" id="ovOk">${isNew ? 'Nice!' : 'OK'}</button>`, { '#ovOk': () => { if (nav.current === 'passport') render(); } });
+      ${switchTo ? `<p class="stamp-set">✈️ A flight countdown is already running. Switch to this flight?</p>`
+        : `<p class="stamp-set">✈️ Flight set up: <b>${apt(s.from)?.city || s.from} → ${apt(s.to)?.city || s.to}</b>, about <b>${fmtMin(s.mins)}</b>${s.km ? ` (${s.km.toLocaleString()} km)` : ''}.<br>Tap <b>Start</b> when the plane starts moving.</p>`}
+      ${switchTo ? '<button class="big-btn" id="ovSwitch">Use this flight</button><button class="big-btn alt" id="ovOk">Keep current one</button>'
+        : `<button class="big-btn" id="ovOk">${isNew ? 'Nice!' : 'OK'}</button>`}`,
+      { '#ovOk': () => { if (nav.current === 'passport') render(); }, ...(switchTo ? { '#ovSwitch': () => { switchTo(); toast('Flight switched'); } } : {}) });
     if (isNew) {
       setTimeout(() => {
         const r = $('.stamp-drop')?.getBoundingClientRect();
