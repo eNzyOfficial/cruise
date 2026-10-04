@@ -12,7 +12,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="style.css?v=13">
+<link rel="stylesheet" href="style.css?v=15">
 </head>
 <body>
 
@@ -59,6 +59,26 @@
         <div class="gt-art fruit-art">🍓🍋🍇<br>🍊🍓🍏</div>
         <div class="gt-name">Fruit Swap</div>
         <div class="gt-meta" id="meta-fruit"></div>
+      </button>
+      <button class="game-tile" data-go="wsearch">
+        <div class="gt-art ws-art"><i>C</i><i class="h">A</i><i>T</i><i class="h">S</i><i>U</i><i class="h">U</i><i>N</i><i class="h">N</i><i>D</i></div>
+        <div class="gt-name">Word Search</div>
+        <div class="gt-meta" id="meta-wsearch"></div>
+      </button>
+      <button class="game-tile" data-go="sudoku">
+        <div class="gt-art sd-art"><i>5</i><i></i><i>3</i><i></i><i>7</i><i></i><i>9</i><i>1</i><i></i></div>
+        <div class="gt-name">Sudoku</div>
+        <div class="gt-meta" id="meta-sudoku"></div>
+      </button>
+      <button class="game-tile" data-go="merge">
+        <div class="gt-art merge-art"><span style="font-size:18px">🍒</span><span style="font-size:24px">🍊</span><span style="font-size:34px">🍉</span></div>
+        <div class="gt-name">Fruit Merge</div>
+        <div class="gt-meta" id="meta-merge"></div>
+      </button>
+      <button class="game-tile" data-go="bubbles">
+        <div class="gt-art bub-art"><i></i><i class="p"></i><i></i><i></i><i></i><i class="p"></i></div>
+        <div class="gt-name">Bubble Wrap</div>
+        <div class="gt-meta" id="meta-bubbles"></div>
       </button>
     </div>
     <p class="foot">Works offline. Airplane mode is fine.</p>
@@ -118,6 +138,7 @@
     <div class="wd-stats" id="wdStats"></div>
     <div class="wd-grid" id="wdGrid"></div>
     <div class="wd-msg" id="wdMsg"></div>
+    <div class="wd-help"><button id="wdClue">💡 Clue</button><button id="wdReveal">🔤 Reveal a letter</button><button id="wdEasy"></button></div>
     <div class="kb" id="wdKb"></div>
   </div>
 </section>
@@ -136,6 +157,55 @@
       <button id="whClear">Clear</button>
       <button id="whEnter" class="primary">Enter</button>
     </div>
+  </div>
+</section>
+
+<!-- WORD SEARCH -->
+<section class="screen" id="wsearch">
+  <div class="topbar"><button class="back" data-go="home">‹ Home</button><div class="game-title">Word Search</div><div class="chip" data-chip></div></div>
+  <div class="game-body ws-body">
+    <div class="ws-theme" id="wsTheme"></div>
+    <div class="ws-grid-wrap"><div class="ws-grid" id="wsGrid"></div><svg class="ws-lines" id="wsLines"></svg></div>
+    <div class="ws-words" id="wsWords"></div>
+    <button class="ghost-btn" id="wsNew">New puzzle</button>
+  </div>
+</section>
+
+<!-- SUDOKU -->
+<section class="screen" id="sudoku">
+  <div class="topbar"><button class="back" data-go="home">‹ Home</button><div class="game-title">Sudoku</div><div class="chip" data-chip></div></div>
+  <div class="game-body sd-body">
+    <div class="sd-info"><span id="sdLevel"></span><span id="sdMistakes"></span><span id="sdTime"></span></div>
+    <div class="sd-grid" id="sdGrid"></div>
+    <div class="sd-tools">
+      <button id="sdUndo"><span>↩︎</span>Undo</button>
+      <button id="sdErase"><span>⌫</span>Erase</button>
+      <button id="sdNotes"><span>✏️</span>Notes <b id="sdNotesState">off</b></button>
+      <button id="sdHint"><span>💡</span>Hint</button>
+    </div>
+    <div class="sd-pad" id="sdPad"></div>
+    <button class="ghost-btn" id="sdNew">New game</button>
+  </div>
+</section>
+
+<!-- FRUIT MERGE -->
+<section class="screen" id="merge">
+  <div class="topbar"><button class="back" data-go="home">‹ Home</button><div class="game-title">Fruit Merge</div><div class="tb-right"><button class="sound-btn" id="mgSound">🔇</button><div class="chip" data-chip></div></div></div>
+  <div class="game-body mg-body">
+    <div class="score-row"><div><small>Score</small><b id="mgScore">0</b></div><div><small>Best</small><b id="mgBest">0</b></div><div class="mg-next"><small>Next</small><b id="mgNext"></b></div></div>
+    <div class="mg-stage" id="mgStage"><canvas id="mgCanvas"></canvas></div>
+    <div class="mg-chain" id="mgChain"></div>
+    <button class="ghost-btn" id="mgRestart">New game</button>
+  </div>
+</section>
+
+<!-- BUBBLE WRAP -->
+<section class="screen" id="bubbles">
+  <div class="topbar"><button class="back" data-go="home">‹ Home</button><div class="game-title">Bubble Wrap</div><div class="tb-right"><button class="sound-btn" id="bbSound">🔇</button><div class="chip" data-chip></div></div></div>
+  <div class="game-body bb-body">
+    <div class="bb-count" id="bbCount"></div>
+    <div class="bb-sheet" id="bbSheet"></div>
+    <p class="bb-tip">Tap or drag your finger across to pop</p>
   </div>
 </section>
 
@@ -165,19 +235,23 @@
 <div class="toast" id="toast"></div>
 <div class="sheet" id="sheet"><div class="sheet-card" id="sheetCard"></div></div>
 
-<script src="words.js?v=13"></script>
-<script src="core.js?v=13"></script>
-<script src="fx.js?v=13"></script>
-<script src="facts.js?v=13"></script>
-<script src="flight.js?v=13"></script>
-<script src="games/wordle.js?v=13"></script>
-<script src="games/wheel.js?v=13"></script>
-<script src="games/blocks.js?v=13"></script>
-<script src="games/fruit.js?v=13"></script>
-<script src="mywords.js?v=13"></script>
-<script src="unicorn.js?v=13"></script>
-<script src="surprise.enc.js?v=13"></script>
-<script src="tia.js?v=13"></script>
+<script src="words.js?v=15"></script>
+<script src="core.js?v=15"></script>
+<script src="fx.js?v=15"></script>
+<script src="facts.js?v=15"></script>
+<script src="flight.js?v=15"></script>
+<script src="games/wordle.js?v=15"></script>
+<script src="games/wheel.js?v=15"></script>
+<script src="games/blocks.js?v=15"></script>
+<script src="games/fruit.js?v=15"></script>
+<script src="games/wordsearch.js?v=15"></script>
+<script src="games/sudoku.js?v=15"></script>
+<script src="games/merge.js?v=15"></script>
+<script src="games/bubbles.js?v=15"></script>
+<script src="mywords.js?v=15"></script>
+<script src="unicorn.js?v=15"></script>
+<script src="surprise.enc.js?v=15"></script>
+<script src="tia.js?v=15"></script>
 <script>
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 </script>

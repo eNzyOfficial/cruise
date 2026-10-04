@@ -24,16 +24,20 @@
   }
   const save = () => store.set('wheel', st);
 
+  // Letters sit on a circle. Swipe across them like a phone unlock pattern, or tap them one by one.
+  let letterEls = [];
   function layoutRing() {
-    ring.innerHTML = '';
-    st.letters.forEach((ch, i) => {
+    ring.innerHTML = '<svg class="wh-lines" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>';
+    letterEls = st.letters.map((ch, i) => {
       const a = (i / st.letters.length) * Math.PI * 2 - Math.PI / 2;
       const b = document.createElement('button');
       b.textContent = ch;
-      b.style.left = (50 + Math.cos(a) * 33) + '%';
-      b.style.top = (50 + Math.sin(a) * 33) + '%';
-      b.addEventListener('click', () => tapLetter(i));
+      b.dataset.x = 50 + Math.cos(a) * 33;
+      b.dataset.y = 50 + Math.sin(a) * 33;
+      b.style.left = b.dataset.x + '%';
+      b.style.top = b.dataset.y + '%';
       ring.appendChild(b);
+      return b;
     });
   }
 
@@ -42,14 +46,49 @@
     if (at === -1) picked.push(i);
     else if (at === picked.length - 1) picked.pop();
     else return;
-    window.uni?.boomEl(ring.children[i]);
+    window.uni?.boomEl(letterEls[i]);
     renderCurrent();
   }
 
-  function renderCurrent() {
+  function renderCurrent(finger) {
     cur.textContent = picked.map(i => st.letters[i]).join('');
-    [...ring.children].forEach((b, i) => b.classList.toggle('used', picked.includes(i)));
+    letterEls.forEach((b, i) => b.classList.toggle('used', picked.includes(i)));
+    const pts = picked.map(i => `${letterEls[i].dataset.x},${letterEls[i].dataset.y}`);
+    if (finger && picked.length) pts.push(`${finger[0]},${finger[1]}`);
+    const svg = ring.querySelector('.wh-lines');
+    if (svg) svg.innerHTML = pts.length > 1 ? `<polyline points="${pts.join(' ')}"/>` : '';
   }
+
+  // ---------- swipe input ----------
+  let drag = null;
+  const ringPoint = e => {
+    const r = ring.getBoundingClientRect();
+    return [(e.clientX - r.left) / r.width * 100, (e.clientY - r.top) / r.height * 100];
+  };
+  const letterAt = ([x, y]) => letterEls.findIndex(b => Math.hypot(b.dataset.x - x, b.dataset.y - y) < 12.5);
+  ring.addEventListener('pointerdown', e => {
+    const i = letterAt(ringPoint(e));
+    if (i < 0) return;
+    e.preventDefault();
+    drag = { id: e.pointerId, added: 0, start: i, moved: false };
+    if (!picked.includes(i)) { tapLetter(i); drag.added++; }
+  });
+  window.addEventListener('pointermove', e => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const p = ringPoint(e);
+    const i = letterAt(p);
+    if (i >= 0 && i !== drag.start) drag.moved = true;
+    if (i >= 0 && !picked.includes(i)) { tapLetter(i); drag.added++; haptic(); }
+    else if (i >= 0 && picked.length >= 2 && picked[picked.length - 2] === i) { picked.pop(); renderCurrent(); } // slide back to undo
+    renderCurrent(drag.moved ? p : null);
+  });
+  window.addEventListener('pointerup', e => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const d = drag; drag = null;
+    if (d.moved && picked.length >= 2) { enter(); return; } // swiped: submit straight away
+    if (!d.moved && d.added === 0) tapLetter(d.start); // tapped a picked letter: undo it
+    renderCurrent();
+  });
 
   function render(flashWord) {
     slots.innerHTML = st.targets.map(w => {

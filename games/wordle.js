@@ -6,7 +6,12 @@
   let typed = '';
   let busy = false;
 
-  const newGame = () => { st = { answer: pick(WORDS.answers), guesses: [], done: false }; typed = ''; save(); render(); };
+  // Easy mode (default) picks from the most common words and gives clue + reveal help
+  let easy = store.get('wordleEasy', true);
+  const newGame = () => {
+    st = { answer: pick(easy ? WORDS.answers.slice(0, 450) : WORDS.answers), guesses: [], done: false, revealed: [], clue: false };
+    typed = ''; save(); render();
+  };
   const save = () => store.set('wordle', st);
 
   function score(guess, answer) {
@@ -69,7 +74,18 @@
       b.className = (b.classList.contains('wide') ? 'wide ' : '') + (s || '');
     });
     $('#wdStats').textContent = stats.played ? `Solved ${stats.wins} · Streak ${stats.streak}` : '';
-    msg.textContent = st.done ? '' : `Guess ${Math.min(st.guesses.length + 1, 6)} of 6` + (st.guesses.length ? ' · tap a word to see its meaning' : '');
+    // revealed letters: shown as a hint strip and green on the keyboard
+    const rev = st.revealed || [];
+    rev.forEach(p => { keyState[st.answer[p]] = 'g'; });
+    $$('button[data-k]', kb).forEach(b => { if (keyState[b.dataset.k] === 'g') b.className = (b.classList.contains('wide') ? 'wide ' : '') + 'g'; });
+    $('#wdReveal').textContent = `🔤 Reveal a letter (${2 - rev.length})`;
+    $('#wdReveal').disabled = !easy || rev.length >= 2 || st.done;
+    $('#wdClue').disabled = !easy || st.done;
+    $('#wdEasy').textContent = easy ? 'Easy ✓' : 'Easy';
+    $('#wdEasy').classList.toggle('on', easy);
+    $('#wdClue').style.display = $('#wdReveal').style.display = easy ? '' : 'none';
+    const strip = rev.length ? [...st.answer].map((ch, p) => rev.includes(p) ? ch.toUpperCase() : '_').join(' ') : '';
+    msg.innerHTML = st.done ? '' : strip ? `Hint: <b class="wd-strip">${strip}</b>` : `Guess ${Math.min(st.guesses.length + 1, 6)} of 6` + (st.guesses.length ? ' · tap a word to see its meaning' : '');
   }
 
   async function key(k) {
@@ -124,6 +140,30 @@
     const r = [...grid.children].indexOf(row);
     if (r >= 0 && r < st.guesses.length) showDefinition(st.guesses[r], 'Word Guess');
   });
+
+  // ---------- help buttons ----------
+  $('#wdReveal').onclick = () => {
+    st.revealed ||= [];
+    const known = new Set(st.revealed);
+    st.guesses.forEach(g => [...g].forEach((ch, p) => { if (ch === st.answer[p]) known.add(p); }));
+    const options = [0, 1, 2, 3, 4].filter(p => !known.has(p));
+    if (!options.length || st.revealed.length >= 2) return;
+    st.revealed.push(pick(options));
+    save(); render();
+    window.uni?.boomEl($('#wdReveal'), true);
+  };
+  $('#wdClue').onclick = async () => {
+    const senses = await dict.get(st.answer);
+    st.clue = true; save();
+    const hide = t => t.replace(new RegExp(st.answer, 'gi'), '_____');
+    overlay.show(`<h2>💡 Clue</h2><div class="ov-def">${senses ? senses.slice(0, 2).map(s => `<div class="def-sense">${POS_NAME[s.p] ? `<span class="def-pos">${POS_NAME[s.p]}</span>` : ''}<div class="def-text">${hide(s.d)}</div></div>`).join('') : '<p>No clue for this one, sorry!</p>'}</div>
+      <button class="big-btn" id="ovOk">Got it</button>`, { '#ovOk': () => {} });
+  };
+  $('#wdEasy').onclick = () => {
+    easy = !easy; store.set('wordleEasy', easy);
+    toast(easy ? 'Easy mode on: common words, clues and hints' : 'Easy mode off: any word, no help');
+    if (!st.guesses.length) newGame(); else render();
+  };
 
   document.addEventListener('keydown', e => {
     if (nav.current !== 'wordle' || e.metaKey || e.ctrlKey) return;
