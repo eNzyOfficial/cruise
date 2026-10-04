@@ -42,6 +42,7 @@
     if (at === -1) picked.push(i);
     else if (at === picked.length - 1) picked.pop();
     else return;
+    window.uni?.boomEl(ring.children[i]);
     renderCurrent();
   }
 
@@ -75,7 +76,7 @@
     picked = [];
     if (w.length < 3) { if (w) toast('3 letters or more'); renderCurrent(); return; }
     if (st.found.includes(w) || st.bonus.includes(w)) toast('Already found');
-    else if (st.targets.includes(w)) { st.found.push(w); learned.add(w, 'Word Wheel'); save(); render(w); if (st.found.length === st.targets.length) return finish(); return; }
+    else if (st.targets.includes(w)) { st.found.push(w); learned.add(w, 'Word Wheel'); save(); render(w); window.uni?.boomEl(slots.querySelector('.flash'), true); if (window.uni?.on) fx.fireworks(2, 400); if (st.found.length === st.targets.length) return finish(); return; }
     else if (WORDS.all.has(w)) { st.bonus.push(w); save(); learned.add(w, 'Word Wheel'); toast(`Bonus word: ${w.toUpperCase()}`); render(); return; }
     else toast('Not a word');
     renderCurrent();
@@ -96,6 +97,7 @@
 
   function finish() {
     fx.celebrate();
+    if (window.uni?.on) { fx.emojiRain(['🦄', '🌈', '✨', '💖'], 50); fx.fireworks(10, 2000); }
     solved++;
     store.set('wheelSolved', solved);
     setTimeout(() => {

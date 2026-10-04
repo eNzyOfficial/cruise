@@ -110,13 +110,19 @@ const dict = {
 setTimeout(() => dict.load(), 1200);
 
 // Words the player has met: saved so they can review them later
+// Each entry: { w: word, from: game, t: time, star: bool, knew: times answered "I knew it" }
 const learned = {
   all() { return store.get('learned', []); },
+  save(list) { store.set('learned', list.slice(0, 1000)); },
   add(word, from) {
-    const list = learned.all().filter(x => x.w !== word);
-    list.unshift({ w: word, from, t: Date.now() });
-    store.set('learned', list.slice(0, 500));
+    const list = learned.all();
+    const old = list.find(x => x.w === word);
+    const rest = list.filter(x => x.w !== word);
+    rest.unshift({ ...old, w: word, from: old?.from || from, t: Date.now() });
+    learned.save(rest);
   },
+  patch(word, changes) { learned.save(learned.all().map(x => x.w === word ? { ...x, ...changes } : x)); },
+  remove(word) { learned.save(learned.all().filter(x => x.w !== word)); },
 };
 
 function sensesHTML(senses, word) {
@@ -135,10 +141,17 @@ async function showDefinition(word, from) {
   $('#sheetCard').innerHTML = `<div class="sheet-grab"></div>
     <div class="def-word">${word}</div>
     ${sensesHTML(senses, word)}
-    <div class="def-saved">✓ Saved to My Words</div>
+    <div class="def-saved">✓ Saved to My Words <button id="sheetStar"></button></div>
     <button class="big-btn alt" id="sheetClose">Close</button>`;
   sheet.classList.add('show');
   $('#sheetClose').onclick = hideSheet;
+  const paintStar = () => {
+    const on = learned.all().find(x => x.w === word)?.star;
+    $('#sheetStar').textContent = on ? '★ Starred' : '☆ Star it';
+    $('#sheetStar').classList.toggle('on', !!on);
+  };
+  $('#sheetStar').onclick = () => { learned.patch(word, { star: !learned.all().find(x => x.w === word)?.star }); paintStar(); };
+  paintStar();
 }
-function hideSheet() { $('#sheet').classList.remove('show'); }
+function hideSheet() { $('#sheet').classList.remove('show'); if (nav.current === 'mywords') screens.mywords?.onShow(); }
 document.addEventListener('click', e => { if (e.target.id === 'sheet') hideSheet(); });

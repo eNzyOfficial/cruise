@@ -37,7 +37,7 @@
       k === '⏎' ? '<button class="wide" data-k="enter">Enter</button>'
       : k === '⌫' ? '<button class="wide" data-k="back">⌫</button>'
       : `<button data-k="${k}">${k}</button>`).join('')}</div>`).join('');
-    kb.addEventListener('click', e => { const b = e.target.closest('[data-k]'); if (b) key(b.dataset.k); });
+    kb.addEventListener('click', e => { const b = e.target.closest('[data-k]'); if (b) { key(b.dataset.k); window.uni?.boomEl(b); } });
   }
 
   function render(animateRow = -1) {
@@ -100,6 +100,7 @@
     save();
     busy = true;
     render(st.guesses.length - 1);
+    if (window.uni?.on) [...row.children].forEach((cell, i) => setTimeout(() => uni.boomEl(cell, cell.classList.contains('g')), 120 * i + 250));
     await sleep(800);
     busy = false;
     if (st.done) showEnd();
@@ -109,7 +110,7 @@
     const praise = ['Genius!', 'Brilliant!', 'Great job!', 'Nice one!', 'Got it!', 'Phew, made it!'];
     const senses = await dict.get(st.answer);
     learned.add(st.answer, 'Word Guess');
-    if (st.won) fx.celebrate();
+    if (st.won) { fx.celebrate(); if (window.uni?.on) { fx.emojiRain(['🦄', '🌈', '✨', '💖'], 40); fx.fireworks(8, 1500); } }
     const meaning = `<div class="ov-def">${sensesHTML(senses ? senses.slice(0, 2) : null, st.answer)}</div>`;
     overlay.show(st.won
       ? `<h2>${praise[st.guesses.length - 1]}</h2><div class="big-word">${st.answer.toUpperCase()}</div>${meaning}<p>Solved in ${st.guesses.length}. Streak: ${stats.streak}</p><button class="big-btn" id="ovNext">Next word</button>`

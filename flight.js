@@ -83,7 +83,9 @@ function mapSVG() {
     <circle cx="112" cy="42" r="11" fill="none" stroke="#5eead4" opacity=".35"/>
     <text x="214" y="182" fill="#8a97ab" font-size="12" font-weight="600">${esc(from)}</text>
     <text x="128" y="46" fill="#cfe" font-size="12" font-weight="600">${esc(to)}</text>
+    <defs><linearGradient id="rbw" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff4fa3"/><stop offset=".33" stop-color="#ffe14d"/><stop offset=".66" stop-color="#3cd5ff"/><stop offset="1" stop-color="#9b6bff"/></linearGradient></defs>
     <g id="plane"><path d="${PLANE}" fill="#fff"/></g>
+    <text id="uniPlane" font-size="26" text-anchor="middle" dominant-baseline="central">🦄</text>
   </svg>`;
 }
 
@@ -144,7 +146,7 @@ function renderFlightCard() {
     $('#flFrom').onchange = saveRoute;
     $('#flTo').onchange = saveRoute;
     $$('.route-inputs input').forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') i.blur(); }));
-    $('#flStart').onclick = () => { flight.update({ start: Date.now() }); renderFlightCard(); };
+    $('#flStart').onclick = e => { window.uni?.boom(e.clientX, e.clientY, true); flight.update({ start: Date.now() }); renderFlightCard(); };
     placePlane(0);
     return;
   }
@@ -198,6 +200,7 @@ function placePlane(p) {
   const behind = path.getPointAtLength(Math.max(0, len * p - 1));
   const angle = Math.atan2(ahead.y - behind.y, ahead.x - behind.x) * 180 / Math.PI;
   plane.setAttribute('transform', `translate(${at.x} ${at.y}) rotate(${angle})`);
+  $('#flightCard #uniPlane')?.setAttribute('transform', `translate(${at.x} ${at.y})`);
   done.style.strokeDasharray = `${len * p} ${len}`;
 }
 

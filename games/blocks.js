@@ -202,6 +202,7 @@
     }
     const lines = rows.length + cols.length;
     renderBoard();
+    if (window.uni?.on) p.cells.forEach(([dr, dc]) => uni.boomEl(cellEls[(r + dr) * N + c + dc]));
     if (lines) {
       st.streak++;
       const pts = lines * 10 * lines * Math.min(st.streak, 5);
@@ -210,6 +211,9 @@
       rows.forEach(rr => { for (let k = 0; k < N; k++) clear.add(rr * N + k); });
       cols.forEach(cc => { for (let k = 0; k < N; k++) clear.add(k * N + cc); });
       clear.forEach(i => cellEls[i].classList.add('clearing'));
+      clear.forEach(i => { const b = cellEls[i].getBoundingClientRect(); fx.explode(b.left + b.width / 2, b.top + b.height / 2, st.board[Math.floor(i / N)][i % N] || '#ffd166', 0.8 + lines * 0.3); });
+      if (lines >= 2) fx.flash('#ffd166', 0.3);
+      if (window.uni?.on) { fx.fireworks(2 + lines * 2, 900); fx.emojiRain(['🦄', '🌈', '✨'], 10 * lines); uni.phrase(innerWidth / 2, boardEl.getBoundingClientRect().top + 60); }
       const pop = document.createElement('div');
       pop.className = 'bl-pop';
       const words = ['', 'Nice!', 'Great!', 'Amazing!', 'Incredible!'];

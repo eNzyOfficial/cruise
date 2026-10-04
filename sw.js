@@ -1,8 +1,8 @@
 // Offline cache: everything the app needs is saved on first visit.
 // Bump VERSION whenever files change so phones pick up the update.
-const VERSION = 'cruise-v3';
+const VERSION = 'cruise-v4';
 const FILES = [
-  './', 'index.html', 'style.css', 'manifest.json', 'words.js', 'defs.js', 'core.js', 'fx.js', 'facts.js', 'flight.js', 'mywords.js',
+  './', 'index.html', 'style.css', 'manifest.json', 'words.js', 'defs.js', 'core.js', 'fx.js', 'facts.js', 'flight.js', 'mywords.js', 'unicorn.js',
   'games/wordle.js', 'games/wheel.js', 'games/blocks.js', 'games/fruit.js',
   'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png',
 ];

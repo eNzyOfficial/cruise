@@ -373,6 +373,7 @@
       else if (made.length) combo('Striped! ✨');
       else if (fired.length >= 2 || clear.size >= 12) combo('Slay! 💅', 'big');
       if (chain >= 2) fx.flash('#ffd166', Math.min(0.6, 0.15 * chain));
+      if (window.uni?.on) { const b = boardEl.getBoundingClientRect(); uni.phrase(b.left + b.width / 2, b.top + b.height * 0.75); if (chain >= 2) uni.runner(b.top + b.height / 2); }
       if (chain >= 3) fx.fireworks(Math.min(10, chain * 2), 900);
       if (chain >= 4) fx.emojiRain(['👑', '💎', '✨', '💖', '⭐'], 12 + chain * 4);
       if (made.includes('c')) { fx.emojiRain(['💎', '👑', '✨'], 30); fx.fireworks(4, 600); }

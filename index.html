@@ -21,6 +21,7 @@
   <div class="scroll">
     <header class="home-head">
       <div class="brand">Cruise</div>
+      <button class="uni-toggle" id="uniToggle" aria-pressed="false"><span class="uni-icon">🦄</span><span class="uni-label">Unicorn</span><span class="uni-switch"><i></i></span></button>
       <div class="route-label">BKK <span>→</span> CNX</div>
     </header>
 
@@ -32,6 +33,8 @@
       <span class="bumpy-title">It's bumpy</span>
       <span class="bumpy-sub">Tap for what's going on</span>
     </button>
+
+    <button class="mywords-btn" data-go="mywords"><span>📖</span><div><b>My Words</b><small id="meta-mywords">Words you've met in the games</small></div><i>›</i></button>
 
     <h2 class="section-title">Play</h2>
     <div class="games">
@@ -56,7 +59,6 @@
         <div class="gt-meta" id="meta-fruit"></div>
       </button>
     </div>
-    <button class="mywords-btn" data-go="mywords"><span>📖</span><div><b>My Words</b><small id="meta-mywords">Words you've met in the games</small></div><i>›</i></button>
     <p class="foot">Works offline. Airplane mode is fine.</p>
   </div>
 </section>
@@ -90,7 +92,15 @@
 <!-- MY WORDS -->
 <section class="screen" id="mywords">
   <div class="topbar"><button class="back" data-go="home">‹ Home</button><div class="game-title">My Words</div><div class="chip" data-chip></div></div>
-  <div class="scroll" id="mwList"></div>
+  <div class="scroll">
+    <div class="mw-tools">
+      <input id="mwSearch" type="search" placeholder="Search your words" autocomplete="off" enterkeyhint="search">
+      <div class="mw-filters" id="mwFilters"></div>
+      <div class="mw-actions"><button id="mwPractice" class="primary">🧠 Practice</button><button id="mwClear">Clear all</button></div>
+    </div>
+    <div id="mwList"></div>
+  </div>
+  <div class="mw-undo" id="mwUndo"><span id="mwUndoText"></span><button id="mwUndoBtn">Undo</button></div>
 </section>
 
 <!-- WORDLE -->
@@ -157,6 +167,7 @@
 <script src="games/blocks.js"></script>
 <script src="games/fruit.js"></script>
 <script src="mywords.js"></script>
+<script src="unicorn.js"></script>
 <script>
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 </script>

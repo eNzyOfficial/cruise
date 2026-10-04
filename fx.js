@@ -18,6 +18,11 @@ const fx = (() => {
   addEventListener('resize', resize);
 
   const GOLD = ['#ffe9a8', '#ffd166', '#fff3d1', '#ffb3d9', '#ffffff'];
+  // Unicorn mode doubles everything and paints it rainbow
+  const RBW = ['#ff4fa3', '#ff9a3c', '#ffe14d', '#5dff9a', '#3cd5ff', '#9b6bff', '#ff6bf0'];
+  const U = () => window.uni?.on;
+  const col = c => (U() && Math.random() < 0.7 ? pick(RBW) : c);
+  const more = n => (U() ? Math.round(n * 2) : n);
   const add = p => { if (parts.length < MAX) parts.push({ born: performance.now(), rot: 0, vr: 0, g: 0, drag: 1, ...p }); start(); };
 
   function star(x, y, r, rot) {
@@ -133,14 +138,15 @@ const fx = (() => {
 
   const api = {
     sparkle(x, y, color = '#ffd166', n = 8, speed = 4) {
-      for (let i = 0; i < n; i++) {
+      for (let i = 0; i < more(n); i++) {
         const a = Math.random() * Math.PI * 2, v = speed * (0.4 + Math.random());
         add({ kind: 'spark', x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, drag: 0.92, g: 0.04, size: 4 + Math.random() * 6,
-          color: Math.random() < 0.5 ? color : pick(GOLD), life: 500 + Math.random() * 500, seed: Math.random() * 9, rot: Math.random(), vr: 0.08 });
+          color: col(Math.random() < 0.5 ? color : pick(GOLD)), life: 500 + Math.random() * 500, seed: Math.random() * 9, rot: Math.random(), vr: 0.08 });
       }
     },
     glitter(x, y, n = 10, colors = GOLD, speed = 5) {
-      for (let i = 0; i < n; i++) {
+      if (U()) colors = RBW;
+      for (let i = 0; i < more(n); i++) {
         const a = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.6, v = speed * (0.5 + Math.random());
         add({ kind: 'glitter', x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, g: 0.18, drag: 0.97, size: 3 + Math.random() * 4,
           color: pick(colors), life: 900 + Math.random() * 700, rot: Math.random() * 6, vr: (Math.random() - 0.5) * 0.4 });
@@ -154,6 +160,7 @@ const fx = (() => {
       else add({ kind: 'beam', horizontal, y0: rect.top, y1: rect.bottom, x: rect.x, w: rect.w, y: 0, vx: 0, vy: 0, color, life: 550 });
     },
     confetti(n = 120) {
+      n = more(n);
       const colors = ['#ff6b9d', '#ffd166', '#7ee3c8', '#b28dff', '#ff9f5a', '#ffffff', '#7cb4ff'];
       for (let i = 0; i < n; i++) {
         add({ kind: 'glitter', x: Math.random() * W, y: -20 - Math.random() * H * 0.4, vx: (Math.random() - 0.5) * 2, vy: 2 + Math.random() * 3,
@@ -162,7 +169,9 @@ const fx = (() => {
     },
     // juicy explosion: splash blobs, star rays, sparkles, glitter and a shockwave
     explode(x, y, color = '#ffd166', power = 1) {
-      const n = Math.round(6 * power);
+      if (U() && Math.random() < 0.35) api.emojiBurst(x, y, ['🦄', '🌈', '✨', '💖'], 2);
+      color = col(color);
+      const n = more(Math.round(6 * power));
       for (let i = 0; i < n; i++) {
         const a = Math.random() * Math.PI * 2, v = (3 + Math.random() * 5) * Math.sqrt(power);
         add({ kind: 'blob', x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 2, g: 0.25, drag: 0.97, size: 3 + Math.random() * 4, color, life: 600 + Math.random() * 400 });
