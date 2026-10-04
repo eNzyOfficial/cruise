@@ -627,3 +627,5 @@ body.unicorn .fr-gem span { animation: none; }
 body.unicorn .fr-tile:nth-child(5n) .fr-gem span { animation: jelly 2s ease-in-out infinite; }
 body.unicorn #fruit button, body.unicorn #blocks button { animation: none; }
 body.unicorn .bl-cell.on { animation: none; }
+.tia-compliment { width: 100%; display: flex; align-items: center; gap: 12px; text-align: left; padding: 14px 16px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); }
+.tia-compliment span { font-size: 28px; } .tia-compliment div { display: flex; flex-direction: column; } .tia-compliment small { color: var(--muted); font-size: 13px; }

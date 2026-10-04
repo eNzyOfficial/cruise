@@ -8,7 +8,7 @@ const tia = (() => {
   const HEARTS = ['map', 'facts', 'wordle', 'wheel', 'fruit'];
   const card = $('#tiaCard'), body = $('#tiaBody');
   let data = null;
-  let st = { key: null, hearts: [], read: [], notified: [], words: 0, wheel: false, quiz: null, welcomed: false, dogTaps: 0, ...store.get('tia', {}) };
+  let st = { key: null, hearts: [], read: [], notified: [], words: 0, wheel: false, welcomed: false, dogTaps: 0, ...store.get('tia', {}) };
   const save = () => { if (!preview) store.set('tia', st); };
 
   let preview = false; // ?unlock=ANSWER: Carl checking it himself, nothing saved
@@ -137,7 +137,6 @@ const tia = (() => {
     }
     if (!st.welcomed) { st.welcomed = true; save(); setTimeout(() => letter(data.welcome.title, data.welcome.text), 300); }
 
-    const best = store.get('fruitBest', 1) - 1; // fruit levels beaten
     body.innerHTML = `
       <div class="tia-hero"><img src="img/dog2.png" alt="" id="tiaDog"><div><h1>For ${html(data.name)} 💜</h1><p>From Carl (and the dog)</p></div></div>
 
@@ -155,16 +154,7 @@ const tia = (() => {
       ${st.hearts.length === 5 ? '<button class="big-btn" id="tiaFinal">Read the final letter 💖</button>' : ''}
 
       <h2 class="section-title">Just for you</h2>
-      <div class="tia-grid">
-        <button id="tiaQuiz"><span>🧠</span><b>How well do you know Carl?</b><small>${st.quiz == null ? '8 questions' : `Best: ${st.quiz}/8`}</small></button>
-        <button id="tiaCompliment"><span>💐</span><b>Compliment button</b><small>Tap as often as you like</small></button>
-      </div>
-
-      <h2 class="section-title">Love coupons 🎟️</h2>
-      <div class="tia-coupons">${data.coupons.map(c => {
-        const got = best >= c.level;
-        return `<div class="tia-coupon ${got ? 'got' : ''}"><span>${got ? c.emoji : '🔒'}</span><div><b>${got ? html(c.title) : 'Locked'}</b><small>${got ? 'Show Carl to redeem' : `Beat Fruit Swap level ${c.level}`}</small></div></div>`;
-      }).join('')}</div>
+      <button class="tia-compliment" id="tiaCompliment"><span>💐</span><div><b>Compliment button</b><small>Tap as often as you like</small></div></button>
 
       <h2 class="section-title">Chiang Mai ideas</h2>
       <div class="tia-cm">${data.chiangmai.map(c => `<div class="tia-cm-row"><span>${c.emoji}</span><div><b>${html(c.title)}</b><small>${html(c.text)}</small></div></div>`).join('')}</div>
@@ -178,7 +168,6 @@ const tia = (() => {
       letter(n.title, n.text);
     });
     $('#tiaFinal')?.addEventListener('click', () => letter(data.hearts.final.title, data.hearts.final.text));
-    $('#tiaQuiz').onclick = quiz;
     $('#tiaCompliment').onclick = e => {
       const p = { x: e.clientX, y: e.clientY };
       fx.emojiBurst(p.x, p.y, ['💐', '💖', '✨', '🌸'], 10);
@@ -196,33 +185,6 @@ const tia = (() => {
         setTimeout(() => letter(data.dogMessage.title, data.dogMessage.text), 500);
       } else toast(`${10 - (st.dogTaps % 10)} more 🐾`);
     };
-  }
-
-  // ---------- quiz ----------
-  function quiz() {
-    let i = 0, score = 0;
-    const qs = data.quiz;
-    const ask = () => {
-      if (i >= qs.length) {
-        st.quiz = Math.max(st.quiz ?? 0, score); save();
-        const msg = score === qs.length ? 'You know me better than I know myself 💜' : score >= qs.length - 2 ? 'Okay, you really know me 😍' : 'We need more date nights to study 😅';
-        if (score >= qs.length - 2) { fx.confetti(150); fx.fireworks(6, 1500); }
-        overlay.show(`<h2>${score}/${qs.length}</h2><p>${msg}</p><button class="big-btn" id="ovAgain">Play again</button><button class="big-btn alt" id="ovNo">Done</button>`,
-          { '#ovAgain': quiz, '#ovNo': render });
-        return;
-      }
-      const q = qs[i];
-      overlay.show(`<div class="fc-count">Question ${i + 1} of ${qs.length}</div><h2 class="quiz-q">${html(q.q)}</h2>
-        <div class="quiz-opts">${q.options.map((o, k) => `<button data-k="${k}">${html(o)}</button>`).join('')}</div>`, {});
-      $$('#overlayCard .quiz-opts button').forEach(b => b.onclick = e => {
-        const k = +b.dataset.k, right = k === q.a;
-        $$('#overlayCard .quiz-opts button').forEach(x => { x.disabled = true; if (+x.dataset.k === q.a) x.classList.add('right'); });
-        if (right) { score++; fx.explode(e.clientX, e.clientY, '#5dff9a', 2); fx.emojiBurst(e.clientX, e.clientY, ['💜', '✨'], 6); }
-        else b.classList.add('wrong');
-        setTimeout(() => { i++; ask(); }, 1100);
-      });
-    };
-    ask();
   }
 
   // ---------- hooks used by the games ----------

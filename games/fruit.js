@@ -505,7 +505,6 @@
         <div class="stars">${[1, 2, 3].map(i => `<span class="${i <= stars ? 'on' : ''}" style="animation-delay:${0.2 + i * 0.25}s">★</span>`).join('')}</div>
         <div class="royal-title">${title}</div>
         <p>${st.score} points</p>
-        ${window.tia?.ready ? '<p style="color:#ff9fc8">🎟️ Check For Tia for new coupons</p>' : ''}
         <button class="big-btn royal" id="ovNext">Level ${next} →</button>`, { '#ovNext': () => startLevel(next) });
       if (window.tia?.heartAvailable('fruit')) setTimeout(() => tia.findHeart('fruit'), 1500);
       st = { ...st, done: true };
