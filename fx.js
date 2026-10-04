@@ -6,7 +6,8 @@ const fx = (() => {
   const ctx = cv.getContext('2d');
   let W = 0, H = 0, last = 0, running = false;
   const parts = [];
-  const MAX = 1400;
+  // Particle budget adapts to the phone: if frames get slow, fewer new particles are allowed
+  let MAX = 900, frameAvg = 16.7;
 
   function resize() {
     const dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -22,11 +23,36 @@ const fx = (() => {
   const RBW = ['#ff4fa3', '#ff9a3c', '#ffe14d', '#5dff9a', '#3cd5ff', '#9b6bff', '#ff6bf0'];
   const U = () => window.uni?.on;
   const col = c => (U() && Math.random() < 0.7 ? pick(RBW) : c);
-  const more = n => (U() ? Math.round(n * 2) : n);
+  const more = n => (U() && frameAvg < 20 ? Math.round(n * 1.6) : n);
   // Unicorn mode mixes in photo stickers (the dog!) wherever emoji fly
   const stickers = [];
   const sticker = () => (U() && stickers.length && Math.random() < 0.3 ? pick(stickers) : null);
   const add = p => { if (parts.length < MAX) parts.push({ born: performance.now(), rot: 0, vr: 0, g: 0, drag: 1, ...p }); start(); };
+
+  // Pre-drawn sprites: drawing a cached image is far cheaper than building gradients or emoji text every frame
+  const sprites = new Map();
+  function glowSprite(color) {
+    let c = sprites.get('g' + color);
+    if (!c) {
+      c = document.createElement('canvas'); c.width = c.height = 64;
+      const g = c.getContext('2d'), grad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+      grad.addColorStop(0, color); grad.addColorStop(1, 'transparent');
+      g.fillStyle = grad; g.fillRect(0, 0, 64, 64);
+      sprites.set('g' + color, c);
+    }
+    return c;
+  }
+  function emojiSprite(ch) {
+    let c = sprites.get('e' + ch);
+    if (!c) {
+      c = document.createElement('canvas'); c.width = c.height = 80;
+      const g = c.getContext('2d');
+      g.font = '60px system-ui'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillText(ch, 40, 44);
+      sprites.set('e' + ch, c);
+    }
+    return c;
+  }
 
   function star(x, y, r, rot) {
     ctx.beginPath();
@@ -44,10 +70,7 @@ const fx = (() => {
       const tw = 0.6 + 0.4 * Math.sin((performance.now() - p.born) / 60 + p.seed);
       const r = p.size * (t < 0.15 ? t / 0.15 : fade) * tw;
       ctx.globalAlpha = Math.min(1, fade * 1.4);
-      const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 2.2);
-      g.addColorStop(0, p.color); g.addColorStop(1, 'transparent');
-      ctx.fillStyle = g;
-      ctx.fillRect(p.x - r * 2.2, p.y - r * 2.2, r * 4.4, r * 4.4);
+      ctx.drawImage(glowSprite(p.color), p.x - r * 2.2, p.y - r * 2.2, r * 4.4, r * 4.4);
       ctx.fillStyle = '#fff';
       star(p.x, p.y, r, p.rot);
     } else if (p.kind === 'glitter') {
@@ -86,8 +109,7 @@ const fx = (() => {
         const w = p.size * 2.2, h = w * p.img.naturalHeight / p.img.naturalWidth;
         ctx.drawImage(p.img, -w / 2, -h / 2, w, h);
       } else {
-        ctx.font = `${p.size}px system-ui`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText(p.char, 0, 0);
+        ctx.drawImage(emojiSprite(p.char), -p.size * 0.66, -p.size * 0.66, p.size * 1.33, p.size * 1.33);
       }
       ctx.restore();
     } else if (p.kind === 'bolt') {
@@ -122,6 +144,7 @@ const fx = (() => {
   }
 
   function loop(now) {
+    if (last) { frameAvg = frameAvg * 0.9 + (now - last) * 0.1; MAX = frameAvg > 24 ? 260 : frameAvg > 19 ? 500 : 900; }
     const dt = Math.min(3, (now - (last || now)) / 16.67);
     last = now;
     ctx.clearRect(0, 0, W, H);
@@ -228,6 +251,9 @@ const fx = (() => {
       add({ kind: 'bolt', x0, y0, x1, y1, x: 0, y: 0, vx: 0, vy: 0, size: 2.5, color, life: 420 });
     },
     trail(x, y) {
+      const now = performance.now();
+      if (now - (api._lastTrail || 0) < 28) return;
+      api._lastTrail = now;
       add({ kind: 'spark', x: x + (Math.random() - 0.5) * 10, y: y + (Math.random() - 0.5) * 10, vx: (Math.random() - 0.5) * 1.5, vy: -Math.random() * 1.5, g: 0.02, drag: 0.96,
         size: 3 + Math.random() * 4, color: pick(['#ffd166', '#ff9fc8', '#ffffff', '#b28dff']), life: 450 + Math.random() * 300, seed: Math.random() * 9, rot: 0, vr: 0.1 });
     },
@@ -235,7 +261,7 @@ const fx = (() => {
       const el = document.createElement('div');
       el.className = 'fx-flash';
       el.style.background = `radial-gradient(circle at 50% 45%, ${color}, transparent 75%)`;
-      el.style.setProperty('--a', strength);
+      el.style.setProperty('--a', strength * 0.7);
       document.body.appendChild(el);
       setTimeout(() => el.remove(), 600);
     },

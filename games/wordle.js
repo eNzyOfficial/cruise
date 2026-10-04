@@ -6,7 +6,11 @@
   let typed = '';
   let busy = false;
 
-  const newGame = () => { st = { answer: pick(WORDS.answers), guesses: [], done: false }; typed = ''; save(); render(); };
+  const newGame = () => {
+    const mine = window.tia?.nextWord();
+    st = mine ? { answer: mine.word, guesses: [], done: false, custom: true } : { answer: pick(WORDS.answers), guesses: [], done: false };
+    typed = ''; save(); render();
+  };
   const save = () => store.set('wordle', st);
 
   function score(guess, answer) {
@@ -111,7 +115,13 @@
     const senses = await dict.get(st.answer);
     learned.add(st.answer, 'Word Guess');
     if (st.won) { fx.celebrate(); if (window.uni?.on) { fx.emojiRain(['🦄', '🌈', '✨', '💖'], 40); fx.fireworks(8, 1500); } }
-    const meaning = `<div class="ov-def">${sensesHTML(senses ? senses.slice(0, 2) : null, st.answer)}</div>`;
+    let meaning = `<div class="ov-def">${sensesHTML(senses ? senses.slice(0, 2) : null, st.answer)}</div>`;
+    if (st.custom && !st.customDone) {
+      st.customDone = true; save();
+      window.tia?.wordDone();
+      meaning = `<div class="tia-why">💜 One of Carl's words<br><span>${tia.wordWhy(st.answer) || ''}</span></div>` + meaning;
+      if (st.won && tia.heartAvailable('wordle')) setTimeout(() => tia.findHeart('wordle'), 900);
+    } else if (st.custom) meaning = `<div class="tia-why">💜 <span>${window.tia?.wordWhy(st.answer) || ''}</span></div>` + meaning;
     overlay.show(st.won
       ? `<h2>${praise[st.guesses.length - 1]}</h2><div class="big-word">${st.answer.toUpperCase()}</div>${meaning}<p>Solved in ${st.guesses.length}. Streak: ${stats.streak}</p><button class="big-btn" id="ovNext">Next word</button>`
       : `<h2>So close</h2><p>The word was</p><div class="big-word">${st.answer.toUpperCase()}</div>${meaning}<button class="big-btn" id="ovNext">Next word</button>`,
@@ -136,7 +146,10 @@
   if (!st) newGame(); else render();
 
   screens.wordle = {
-    onShow() { render(); if (st.done) showEnd(); },
+    onShow() {
+      if (!st.guesses.length && !st.custom && !typed && window.tia?.nextWord()) newGame();
+      render(); if (st.done) showEnd();
+    },
     meta: () => stats.played ? `${stats.wins} solved` : '5-letter words',
   };
 })();

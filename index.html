@@ -29,6 +29,8 @@
       <!-- filled by flight.js -->
     </div>
 
+    <button class="tia-card" id="tiaCard" hidden></button>
+
     <button class="bumpy-btn" data-go="bumpy">
       <span class="bumpy-title">It's bumpy</span>
       <span class="bumpy-sub">Tap for what's going on</span>
@@ -87,6 +89,12 @@
       <button data-go="fruit">Fruit Swap</button>
     </div>
   </div>
+</section>
+
+<!-- TIA -->
+<section class="screen" id="tia">
+  <div class="topbar"><button class="back" data-go="home">‹ Home</button><div class="game-title">For Tia 💜</div><div class="chip" data-chip></div></div>
+  <div class="scroll" id="tiaBody"></div>
 </section>
 
 <!-- MY WORDS -->
@@ -168,6 +176,8 @@
 <script src="games/fruit.js"></script>
 <script src="mywords.js"></script>
 <script src="unicorn.js"></script>
+<script src="surprise.enc.js"></script>
+<script src="tia.js"></script>
 <script>
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 </script>

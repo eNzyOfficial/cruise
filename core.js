@@ -1,3 +1,7 @@
+// Reserve these names: otherwise the browser maps window.tia to the <section id="tia"> element
+window.tia = null;
+window.uni = null;
+
 // Shared helpers: storage, navigation, overlay, toast
 const store = {
   get(key, fallback) {

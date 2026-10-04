@@ -505,7 +505,9 @@
         <div class="stars">${[1, 2, 3].map(i => `<span class="${i <= stars ? 'on' : ''}" style="animation-delay:${0.2 + i * 0.25}s">★</span>`).join('')}</div>
         <div class="royal-title">${title}</div>
         <p>${st.score} points</p>
+        ${window.tia?.ready ? '<p style="color:#ff9fc8">🎟️ Check For Tia for new coupons</p>' : ''}
         <button class="big-btn royal" id="ovNext">Level ${next} →</button>`, { '#ovNext': () => startLevel(next) });
+      if (window.tia?.heartAvailable('fruit')) setTimeout(() => tia.findHeart('fruit'), 1500);
       st = { ...st, done: true };
     } else if (st.moves <= 0) {
       overlay.show(`<h2>Out of moves</h2><p>${st.score} of ${goal}. So close, try again!</p>
@@ -549,7 +551,7 @@
     clearHint();
     touch = { p, x: e.clientX, y: e.clientY, id: e.pointerId };
   });
-  boardEl.addEventListener('pointermove', e => { if (e.buttons || e.pointerType === 'touch') { fx.trail(e.clientX, e.clientY); fx.trail(e.clientX, e.clientY); } });
+  boardEl.addEventListener('pointermove', e => { if (!window.uni?.on && (e.buttons || e.pointerType === 'touch')) fx.trail(e.clientX, e.clientY); });
   window.addEventListener('pointermove', e => {
     if (!touch || e.pointerId !== touch.id) return;
     const dx = e.clientX - touch.x, dy = e.clientY - touch.y;

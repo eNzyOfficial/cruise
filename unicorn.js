@@ -77,7 +77,7 @@ const uni = (() => {
   $('#uniTicker').textContent = (PHRASES.join('  ✦  ') + '  ✦  ').repeat(3);
   const cursor = $('#uniCursor');
   cursor.src = DOGS[0];
-  let rizz = store.get('rizz', 0), taps = 0, cursorTimer;
+  let rizz = store.get('rizz', 0), taps = 0, cursorTimer, lastPhrase = 0;
 
   const ACHIEVEMENTS = { 1: 'Touched the screen', 5: 'Tapped 5 times (iconic)', 10: 'Double digits!!', 25: 'Certified tapper', 50: 'Main character energy',
     100: 'Literal legend', 200: 'Touch grass? Never', 500: 'Unicorn royalty 👑', 1000: 'Ascended 🦄' };
@@ -107,23 +107,25 @@ const uni = (() => {
     store.set('rizz', rizz);
     paintRizz();
     haptic();
-    fx.explode(e.clientX, e.clientY, pick(RAINBOW), 2.4);
-    fx.emojiBurst(e.clientX, e.clientY, EMO, 6);
+    const game = ['fruit', 'blocks', 'wordle', 'wheel'].includes(nav.current);
+    fx.explode(e.clientX, e.clientY, pick(RAINBOW), game ? 1.4 : 2.4);
+    fx.emojiBurst(e.clientX, e.clientY, EMO, game ? 3 : 6);
     fx.ring(e.clientX, e.clientY, pick(RAINBOW), 120, 5, 600);
-    if (Math.random() < 0.5) fx.flash(pick(RAINBOW), 0.22);
-    phrase(e.clientX, e.clientY - 50);
-    document.body.classList.remove('uni-shake'); void document.body.offsetWidth; document.body.classList.add('uni-shake');
+    if (!game && Math.random() < 0.5) fx.flash(pick(RAINBOW), 0.22);
+    const now = performance.now();
+    if (now - lastPhrase > (game ? 1200 : 500)) { lastPhrase = now; phrase(e.clientX, e.clientY - 50); }
+    if (!game) { document.body.classList.remove('uni-shake'); void document.body.offsetWidth; document.body.classList.add('uni-shake'); }
     if (ACHIEVEMENTS[taps]) achievement(ACHIEVEMENTS[taps]);
     if (taps % 25 === 0) mega();
     cursor.style.display = 'block';
-    cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px';
+    cursor.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-50%, -115%) rotate(-8deg)`;
     cursor.src = pick(DOGS);
   }, true);
   document.addEventListener('pointermove', e => {
     if (!on) return;
-    if (e.buttons || e.pointerType === 'touch') { fx.trail(e.clientX, e.clientY); fx.trail(e.clientX, e.clientY); fx.trail(e.clientX, e.clientY); }
+    if (e.buttons || e.pointerType === 'touch') fx.trail(e.clientX, e.clientY);
     cursor.style.display = 'block';
-    cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px';
+    cursor.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-50%, -115%) rotate(-8deg)`;
     clearTimeout(cursorTimer);
     cursorTimer = setTimeout(() => cursor.style.display = 'none', 900);
   }, true);
@@ -190,3 +192,4 @@ const uni = (() => {
 
   return { get on() { return on; }, boom, boomEl, phrase, runner, RAINBOW, EMO };
 })();
+window.uni = uni;
