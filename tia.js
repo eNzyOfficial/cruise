@@ -138,7 +138,7 @@ const tia = (() => {
     if (!st.welcomed) { st.welcomed = true; save(); setTimeout(() => letter(data.welcome.title, data.welcome.text), 300); }
 
     body.innerHTML = `
-      <div class="tia-hero"><img src="img/dog2.png" alt="" id="tiaDog"><div><h1>For ${html(data.name)} 💜</h1><p>From Carl (and the dog)</p></div></div>
+      <div class="tia-hero"><img src="img/dog2.png" alt="" id="tiaDog"><div><h1>For ${html(data.name)} 💜</h1><p>From Carl (and ${html(data.dog)})</p></div></div>
 
       <h2 class="section-title">Notes from Carl</h2>
       <div class="tia-notes">${[data.welcome, ...data.notes].map((n, i) => {
@@ -156,8 +156,6 @@ const tia = (() => {
       <h2 class="section-title">Just for you</h2>
       <button class="tia-compliment" id="tiaCompliment"><span>💐</span><div><b>Compliment button</b><small>Tap as often as you like</small></div></button>
 
-      <h2 class="section-title">Chiang Mai ideas</h2>
-      <div class="tia-cm">${data.chiangmai.map(c => `<div class="tia-cm-row"><span>${c.emoji}</span><div><b>${html(c.title)}</b><small>${html(c.text)}</small></div></div>`).join('')}</div>
       <p class="tia-tip">Psst: try tapping the dog at the top. A lot. 🐾</p>`;
 
     $$('[data-note]', body).forEach(b => b.onclick = () => {
@@ -172,7 +170,7 @@ const tia = (() => {
       const p = { x: e.clientX, y: e.clientY };
       fx.emojiBurst(p.x, p.y, ['💐', '💖', '✨', '🌸'], 10);
       overlay.show(`<div class="compliment">${html(pick(data.compliments))}</div>
-        <button class="big-btn" id="ovMore">Another one 💐</button><button class="big-btn alt" id="ovNo">Thanks 💜</button>`,
+        <button class="big-btn" id="ovMore">Another one</button><button class="big-btn alt" id="ovNo">Okay okay</button>`,
         { '#ovMore': () => $('#tiaCompliment').click(), '#ovNo': () => {} });
     };
     $('#tiaDog').onclick = e => {
