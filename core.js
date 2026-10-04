@@ -72,3 +72,73 @@ keepAwake();
 document.addEventListener('gesturestart', e => e.preventDefault());
 
 window.addEventListener('load', refreshMeta);
+
+// ---------- tiny haptic tap (iOS 18+ Safari; silently does nothing elsewhere) ----------
+const haptic = (() => {
+  let label;
+  return () => {
+    try {
+      if (!label) {
+        const input = document.createElement('input');
+        input.type = 'checkbox'; input.setAttribute('switch', ''); input.id = 'hapticSwitch'; input.style.display = 'none';
+        label = document.createElement('label'); label.htmlFor = 'hapticSwitch'; label.style.display = 'none';
+        document.body.append(input, label);
+      }
+      label.click();
+    } catch {}
+  };
+})();
+
+// ---------- dictionary (loaded in the background, works offline) ----------
+const POS_NAME = { n: 'noun', v: 'verb', a: 'adjective', r: 'adverb', x: '' };
+const dict = {
+  ready: null,
+  load() {
+    return this.ready ||= new Promise(res => {
+      const s = document.createElement('script');
+      s.src = 'defs.js'; s.onload = res; s.onerror = res;
+      document.head.appendChild(s);
+    });
+  },
+  async get(word) {
+    await this.load();
+    const raw = window.DEFS?.[word];
+    if (!raw) return null;
+    return raw.split('~').map(x => { const [p, d, e, l] = x.split('|'); return { p, d, e, l }; });
+  },
+};
+setTimeout(() => dict.load(), 1200);
+
+// Words the player has met: saved so they can review them later
+const learned = {
+  all() { return store.get('learned', []); },
+  add(word, from) {
+    const list = learned.all().filter(x => x.w !== word);
+    list.unshift({ w: word, from, t: Date.now() });
+    store.set('learned', list.slice(0, 500));
+  },
+};
+
+function sensesHTML(senses, word) {
+  if (!senses) return `<p class="def-none">No definition saved for this one. It's a real word, just a rare one.</p>`;
+  const base = senses.find(s => s.l)?.l;
+  return (base && base !== word ? `<div class="def-base">a form of <b>${base}</b></div>` : '') +
+    senses.map(s => `<div class="def-sense">${POS_NAME[s.p] ? `<span class="def-pos">${POS_NAME[s.p]}</span>` : ''}
+      <div class="def-text">${s.d}</div>${s.e ? `<div class="def-ex">"${s.e}"</div>` : ''}</div>`).join('');
+}
+
+// Bottom sheet showing a word's meaning
+async function showDefinition(word, from) {
+  const senses = await dict.get(word);
+  learned.add(word, from);
+  const sheet = $('#sheet');
+  $('#sheetCard').innerHTML = `<div class="sheet-grab"></div>
+    <div class="def-word">${word}</div>
+    ${sensesHTML(senses, word)}
+    <div class="def-saved">✓ Saved to My Words</div>
+    <button class="big-btn alt" id="sheetClose">Close</button>`;
+  sheet.classList.add('show');
+  $('#sheetClose').onclick = hideSheet;
+}
+function hideSheet() { $('#sheet').classList.remove('show'); }
+document.addEventListener('click', e => { if (e.target.id === 'sheet') hideSheet(); });

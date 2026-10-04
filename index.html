@@ -56,6 +56,7 @@
         <div class="gt-meta" id="meta-fruit"></div>
       </button>
     </div>
+    <button class="mywords-btn" data-go="mywords"><span>📖</span><div><b>My Words</b><small id="meta-mywords">Words you've met in the games</small></div><i>›</i></button>
     <p class="foot">Works offline. Airplane mode is fine.</p>
   </div>
 </section>
@@ -69,10 +70,11 @@
       <h1>Bumps are normal.</h1>
       <p>It's uncomfortable, but the plane is fine. Here's why.</p>
     </div>
+    <div class="fact-cats" id="factCats"></div>
     <div class="fact-card" id="factCard">
       <div class="fact-num" id="factNum"></div>
       <div class="fact-text" id="factText"></div>
-      <div class="fact-hint">Tap for the next one</div>
+      <div class="fact-foot"><button id="factPrev">‹ Back</button><span class="fact-hint">Tap for the next one</span></div>
     </div>
     <div class="phase-now card" id="bumpyPhase"></div>
     <h2 class="section-title">Take your mind off it</h2>
@@ -83,6 +85,12 @@
       <button data-go="fruit">Fruit Swap</button>
     </div>
   </div>
+</section>
+
+<!-- MY WORDS -->
+<section class="screen" id="mywords">
+  <div class="topbar"><button class="back" data-go="home">‹ Home</button><div class="game-title">My Words</div><div class="chip" data-chip></div></div>
+  <div class="scroll" id="mwList"></div>
 </section>
 
 <!-- WORDLE -->
@@ -126,25 +134,29 @@
 
 <!-- FRUIT -->
 <section class="screen" id="fruit">
-  <div class="topbar"><button class="back" data-go="home">‹ Home</button><div class="game-title">Fruit Swap</div><div class="chip" data-chip></div></div>
+  <div class="topbar"><button class="back" data-go="home">‹ Home</button><div class="game-title">Fruit Swap</div><div class="tb-right"><button class="sound-btn" id="frSound">🔇</button><div class="chip" data-chip></div></div></div>
   <div class="game-body fruit-body">
     <div class="score-row"><div><small>Level</small><b id="frLevel">1</b></div><div><small>Score</small><b id="frScore">0</b></div><div><small>Moves left</small><b id="frMoves">0</b></div></div>
     <div class="fr-goal"><div class="fr-goal-bar"><i id="frGoalFill"></i></div><span id="frGoalText"></span></div>
-    <div class="fr-board" id="frBoard"></div>
+    <div class="fr-stage"><div class="fr-board" id="frBoard"></div></div>
     <button class="ghost-btn" id="frRestart">Restart level</button>
   </div>
 </section>
 
 <div class="overlay" id="overlay"><div class="overlay-card" id="overlayCard"></div></div>
 <div class="toast" id="toast"></div>
+<div class="sheet" id="sheet"><div class="sheet-card" id="sheetCard"></div></div>
 
 <script src="words.js"></script>
 <script src="core.js"></script>
+<script src="fx.js"></script>
+<script src="facts.js"></script>
 <script src="flight.js"></script>
 <script src="games/wordle.js"></script>
 <script src="games/wheel.js"></script>
 <script src="games/blocks.js"></script>
 <script src="games/fruit.js"></script>
+<script src="mywords.js"></script>
 <script>
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 </script>

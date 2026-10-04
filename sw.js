@@ -1,8 +1,8 @@
 // Offline cache: everything the app needs is saved on first visit.
 // Bump VERSION whenever files change so phones pick up the update.
-const VERSION = 'cruise-v1';
+const VERSION = 'cruise-v3';
 const FILES = [
-  './', 'index.html', 'style.css', 'manifest.json', 'words.js', 'core.js', 'flight.js',
+  './', 'index.html', 'style.css', 'manifest.json', 'words.js', 'defs.js', 'core.js', 'fx.js', 'facts.js', 'flight.js', 'mywords.js',
   'games/wordle.js', 'games/wheel.js', 'games/blocks.js', 'games/fruit.js',
   'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png',
 ];
@@ -17,9 +17,21 @@ self.addEventListener('activate', e => {
     .then(() => self.clients.claim()));
 });
 
+// Network first (so updates show up straight away), falling back to the saved copy when offline.
+// A 3-second timeout stops slow airport Wi-Fi from making the app hang.
 self.addEventListener('fetch', e => {
-  if (e.request.method !== 'GET') return;
-  e.respondWith(
-    caches.match(e.request, { ignoreSearch: true }).then(hit => hit || fetch(e.request).catch(() => caches.match('index.html')))
-  );
+  if (e.request.method !== 'GET' || !e.request.url.startsWith(self.location.origin)) return;
+  e.respondWith((async () => {
+    const cache = await caches.open(VERSION);
+    try {
+      const res = await Promise.race([
+        fetch(e.request, { cache: 'no-cache' }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000)),
+      ]);
+      if (res.ok) cache.put(e.request, res.clone());
+      return res;
+    } catch {
+      return (await cache.match(e.request, { ignoreSearch: true })) || (await cache.match('index.html'));
+    }
+  })());
 });

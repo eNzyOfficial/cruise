@@ -69,7 +69,7 @@
       b.className = (b.classList.contains('wide') ? 'wide ' : '') + (s || '');
     });
     $('#wdStats').textContent = stats.played ? `Solved ${stats.wins} · Streak ${stats.streak}` : '';
-    msg.textContent = st.done ? '' : `Guess ${Math.min(st.guesses.length + 1, 6)} of 6`;
+    msg.textContent = st.done ? '' : `Guess ${Math.min(st.guesses.length + 1, 6)} of 6` + (st.guesses.length ? ' · tap a word to see its meaning' : '');
   }
 
   async function key(k) {
@@ -105,13 +105,24 @@
     if (st.done) showEnd();
   }
 
-  function showEnd() {
+  async function showEnd() {
     const praise = ['Genius!', 'Brilliant!', 'Great job!', 'Nice one!', 'Got it!', 'Phew, made it!'];
+    const senses = await dict.get(st.answer);
+    learned.add(st.answer, 'Word Guess');
+    if (st.won) fx.celebrate();
+    const meaning = `<div class="ov-def">${sensesHTML(senses ? senses.slice(0, 2) : null, st.answer)}</div>`;
     overlay.show(st.won
-      ? `<h2>${praise[st.guesses.length - 1]}</h2><div class="big-word">${st.answer.toUpperCase()}</div><p>Solved in ${st.guesses.length}. Streak: ${stats.streak}</p><button class="big-btn" id="ovNext">Next word</button>`
-      : `<h2>So close</h2><p>The word was</p><div class="big-word">${st.answer.toUpperCase()}</div><button class="big-btn" id="ovNext">Next word</button>`,
+      ? `<h2>${praise[st.guesses.length - 1]}</h2><div class="big-word">${st.answer.toUpperCase()}</div>${meaning}<p>Solved in ${st.guesses.length}. Streak: ${stats.streak}</p><button class="big-btn" id="ovNext">Next word</button>`
+      : `<h2>So close</h2><p>The word was</p><div class="big-word">${st.answer.toUpperCase()}</div>${meaning}<button class="big-btn" id="ovNext">Next word</button>`,
       { '#ovNext': newGame });
   }
+
+  // Tap a finished row to see what that word means
+  grid.addEventListener('click', e => {
+    const row = e.target.closest('.wd-row');
+    const r = [...grid.children].indexOf(row);
+    if (r >= 0 && r < st.guesses.length) showDefinition(st.guesses[r], 'Word Guess');
+  });
 
   document.addEventListener('keydown', e => {
     if (nav.current !== 'wordle' || e.metaKey || e.ctrlKey) return;

@@ -54,13 +54,14 @@
     slots.innerHTML = st.targets.map(w => {
       const found = st.found.includes(w);
       const shown = found ? w.length : (st.hints[w] || 0);
-      return `<div class="wh-word${found ? ' found' : ''}${w === flashWord ? ' flash' : ''}">${[...w].map((ch, i) =>
+      return `<div data-w="${found ? w : ''}" class="wh-word${found ? ' found' : ''}${w === flashWord ? ' flash' : ''}">${[...w].map((ch, i) =>
         `<i class="${!found && i < shown ? 'hint' : ''}">${i < shown ? ch : ''}</i>`).join('')}</div>`;
     }).join('');
-    info.innerHTML = `Found ${st.found.length} of ${st.targets.length}${st.bonus.length ? ` · ${st.bonus.length} bonus` : ''} &nbsp;·&nbsp; <button id="whSkip" style="color:var(--accent);font-size:13px">New letters</button>`;
+    info.innerHTML = `Found ${st.found.length} of ${st.targets.length}${st.found.length ? ' · tap to learn' : ''}${st.bonus.length ? ` · <button id="whBonus" style="color:var(--warm);font-size:13px">${st.bonus.length} bonus</button>` : ''} &nbsp;·&nbsp; <button id="whSkip" style="color:var(--accent);font-size:13px">New letters</button>`;
     $('#whSkip').onclick = () => overlay.show(`<h2>New letters?</h2><p>You'll skip this puzzle.</p>
       <button class="big-btn" id="ovYes">New letters</button><button class="big-btn alt" id="ovNo">Keep going</button>`,
       { '#ovYes': newPuzzle, '#ovNo': () => {} });
+    $('#whBonus')?.addEventListener('click', showBonus);
     layoutRing();
     renderCurrent();
     if (flashWord) {
@@ -74,18 +75,37 @@
     picked = [];
     if (w.length < 3) { if (w) toast('3 letters or more'); renderCurrent(); return; }
     if (st.found.includes(w) || st.bonus.includes(w)) toast('Already found');
-    else if (st.targets.includes(w)) { st.found.push(w); save(); render(w); if (st.found.length === st.targets.length) return finish(); return; }
-    else if (WORDS.all.has(w)) { st.bonus.push(w); save(); toast(`Bonus word: ${w.toUpperCase()}`); render(); return; }
+    else if (st.targets.includes(w)) { st.found.push(w); learned.add(w, 'Word Wheel'); save(); render(w); if (st.found.length === st.targets.length) return finish(); return; }
+    else if (WORDS.all.has(w)) { st.bonus.push(w); save(); learned.add(w, 'Word Wheel'); toast(`Bonus word: ${w.toUpperCase()}`); render(); return; }
     else toast('Not a word');
     renderCurrent();
   }
 
+  function showBonus() {
+    overlay.show(`<h2>Bonus words</h2><p>Tap one to see what it means.</p>
+      <div class="word-chips">${st.bonus.map(w => `<button data-def="${w}">${w}</button>`).join('')}</div>
+      <button class="big-btn alt" id="ovNo">Close</button>`, { '#ovNo': () => {} });
+    $$('#overlayCard [data-def]').forEach(b => b.onclick = () => { overlay.hide(); showDefinition(b.dataset.def, 'Word Wheel'); });
+  }
+
+  // Tap a found word to see its meaning
+  slots.addEventListener('click', e => {
+    const w = e.target.closest('[data-w]')?.dataset.w;
+    if (w) showDefinition(w, 'Word Wheel');
+  });
+
   function finish() {
+    fx.celebrate();
     solved++;
     store.set('wheelSolved', solved);
-    setTimeout(() => overlay.show(`<h2>All found!</h2><div class="big-word">${st.base.toUpperCase()}</div>
+    setTimeout(() => {
+      overlay.show(`<h2>All found!</h2><div class="big-word">${st.base.toUpperCase()}</div>
       <p>${st.bonus.length ? `Plus ${st.bonus.length} bonus word${st.bonus.length > 1 ? 's' : ''}. ` : ''}Puzzles solved: ${solved}</p>
-      <button class="big-btn" id="ovNext">Next puzzle</button>`, { '#ovNext': newPuzzle }), 500);
+      <div class="word-chips">${st.targets.map(w => `<button data-def="${w}">${w}</button>`).join('')}</div>
+      <p style="font-size:13px">Tap a word to see what it means. They're all saved in My Words.</p>
+      <button class="big-btn" id="ovNext">Next puzzle</button>`, { '#ovNext': newPuzzle });
+      $$('#overlayCard [data-def]').forEach(b => b.onclick = () => showDefinition(b.dataset.def, 'Word Wheel'));
+    }, 500);
   }
 
   function hint() {
