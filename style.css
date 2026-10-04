@@ -823,3 +823,4 @@ body.unicorn .pp-emblem { border-color: #fff; }
 .ac-list button:last-child { border-bottom: 0; }
 .ac-list b { font-size: 15px; } .ac-list span { color: var(--accent); font-weight: 700; font-size: 13px; margin-left: 4px; }
 .ac-list small { display: block; color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.foot .ver { opacity: .5; font-size: 11px; }
