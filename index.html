@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cruise">
+<meta name="theme-color" content="#0b0f17">
+<title>Cruise</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- HOME -->
+<section class="screen active" id="home">
+  <div class="scroll">
+    <header class="home-head">
+      <div class="brand">Cruise</div>
+      <div class="route-label">BKK <span>→</span> CNX</div>
+    </header>
+
+    <div class="card flight" id="flightCard">
+      <!-- filled by flight.js -->
+    </div>
+
+    <button class="bumpy-btn" data-go="bumpy">
+      <span class="bumpy-title">It's bumpy</span>
+      <span class="bumpy-sub">Tap for what's going on</span>
+    </button>
+
+    <h2 class="section-title">Play</h2>
+    <div class="games">
+      <button class="game-tile" data-go="wordle">
+        <div class="gt-art wordle-art"><i class="g">W</i><i class="y">O</i><i>R</i><i class="g">D</i></div>
+        <div class="gt-name">Word Guess</div>
+        <div class="gt-meta" id="meta-wordle"></div>
+      </button>
+      <button class="game-tile" data-go="wheel">
+        <div class="gt-art wheel-art"><span>A</span><span>T</span><span>R</span><span>E</span><span>S</span><span>M</span></div>
+        <div class="gt-name">Word Wheel</div>
+        <div class="gt-meta" id="meta-wheel"></div>
+      </button>
+      <button class="game-tile" data-go="blocks">
+        <div class="gt-art blocks-art"><i class="c1"></i><i class="c1"></i><i></i><i class="c3"></i><i></i><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c2"></i><i class="c2"></i><i></i><i class="c3"></i></div>
+        <div class="gt-name">Block Drop</div>
+        <div class="gt-meta" id="meta-blocks"></div>
+      </button>
+      <button class="game-tile" data-go="fruit">
+        <div class="gt-art fruit-art">🍓🍋🍇<br>🍊🍓🍏</div>
+        <div class="gt-name">Fruit Swap</div>
+        <div class="gt-meta" id="meta-fruit"></div>
+      </button>
+    </div>
+    <p class="foot">Works offline. Airplane mode is fine.</p>
+  </div>
+</section>
+
+<!-- BUMPY -->
+<section class="screen" id="bumpy">
+  <div class="topbar"><button class="back" data-go="home">‹ Home</button><div class="chip" data-chip></div></div>
+  <div class="scroll bumpy-body">
+    <div class="bumpy-hero">
+      <div class="calm-dot"></div>
+      <h1>Bumps are normal.</h1>
+      <p>It's uncomfortable, but the plane is fine. Here's why.</p>
+    </div>
+    <div class="fact-card" id="factCard">
+      <div class="fact-num" id="factNum"></div>
+      <div class="fact-text" id="factText"></div>
+      <div class="fact-hint">Tap for the next one</div>
+    </div>
+    <div class="phase-now card" id="bumpyPhase"></div>
+    <h2 class="section-title">Take your mind off it</h2>
+    <div class="quick-games">
+      <button data-go="wordle">Word Guess</button>
+      <button data-go="wheel">Word Wheel</button>
+      <button data-go="blocks">Block Drop</button>
+      <button data-go="fruit">Fruit Swap</button>
+    </div>
+  </div>
+</section>
+
+<!-- WORDLE -->
+<section class="screen" id="wordle">
+  <div class="topbar"><button class="back" data-go="home">‹ Home</button><div class="game-title">Word Guess</div><div class="chip" data-chip></div></div>
+  <div class="game-body wordle-body">
+    <div class="wd-stats" id="wdStats"></div>
+    <div class="wd-grid" id="wdGrid"></div>
+    <div class="wd-msg" id="wdMsg"></div>
+    <div class="kb" id="wdKb"></div>
+  </div>
+</section>
+
+<!-- WHEEL -->
+<section class="screen" id="wheel">
+  <div class="topbar"><button class="back" data-go="home">‹ Home</button><div class="game-title">Word Wheel</div><div class="chip" data-chip></div></div>
+  <div class="game-body wheel-body">
+    <div class="wh-info" id="whInfo"></div>
+    <div class="wh-slots" id="whSlots"></div>
+    <div class="wh-current" id="whCurrent"></div>
+    <div class="wh-ring" id="whRing"></div>
+    <div class="wh-actions">
+      <button id="whShuffle">Shuffle</button>
+      <button id="whHint">Hint</button>
+      <button id="whClear">Clear</button>
+      <button id="whEnter" class="primary">Enter</button>
+    </div>
+  </div>
+</section>
+
+<!-- BLOCKS -->
+<section class="screen" id="blocks">
+  <div class="topbar"><button class="back" data-go="home">‹ Home</button><div class="game-title">Block Drop</div><div class="chip" data-chip></div></div>
+  <div class="game-body blocks-body">
+    <div class="score-row"><div><small>Score</small><b id="blScore">0</b></div><div><small>Best</small><b id="blBest">0</b></div></div>
+    <div class="bl-board" id="blBoard"></div>
+    <div class="bl-tray" id="blTray"></div>
+    <button class="ghost-btn" id="blRestart">New game</button>
+  </div>
+</section>
+
+<!-- FRUIT -->
+<section class="screen" id="fruit">
+  <div class="topbar"><button class="back" data-go="home">‹ Home</button><div class="game-title">Fruit Swap</div><div class="chip" data-chip></div></div>
+  <div class="game-body fruit-body">
+    <div class="score-row"><div><small>Level</small><b id="frLevel">1</b></div><div><small>Score</small><b id="frScore">0</b></div><div><small>Moves left</small><b id="frMoves">0</b></div></div>
+    <div class="fr-goal"><div class="fr-goal-bar"><i id="frGoalFill"></i></div><span id="frGoalText"></span></div>
+    <div class="fr-board" id="frBoard"></div>
+    <button class="ghost-btn" id="frRestart">Restart level</button>
+  </div>
+</section>
+
+<div class="overlay" id="overlay"><div class="overlay-card" id="overlayCard"></div></div>
+<div class="toast" id="toast"></div>
+
+<script src="words.js"></script>
+<script src="core.js"></script>
+<script src="flight.js"></script>
+<script src="games/wordle.js"></script>
+<script src="games/wheel.js"></script>
+<script src="games/blocks.js"></script>
+<script src="games/fruit.js"></script>
+<script>
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+</script>
+</body>
+</html>

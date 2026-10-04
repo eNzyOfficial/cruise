@@ -1,0 +1,130 @@
+// Word Guess: guess the 5-letter word in 6 tries, unlimited puzzles
+(() => {
+  const grid = $('#wdGrid'), kb = $('#wdKb'), msg = $('#wdMsg');
+  let st = store.get('wordle', null);
+  let stats = store.get('wordleStats', { played: 0, wins: 0, streak: 0 });
+  let typed = '';
+  let busy = false;
+
+  const newGame = () => { st = { answer: pick(WORDS.answers), guesses: [], done: false }; typed = ''; save(); render(); };
+  const save = () => store.set('wordle', st);
+
+  function score(guess, answer) {
+    const res = Array(5).fill('x'), left = {};
+    for (let i = 0; i < 5; i++) {
+      if (guess[i] === answer[i]) res[i] = 'g';
+      else left[answer[i]] = (left[answer[i]] || 0) + 1;
+    }
+    for (let i = 0; i < 5; i++) {
+      if (res[i] !== 'g' && left[guess[i]]) { res[i] = 'y'; left[guess[i]]--; }
+    }
+    return res;
+  }
+
+  function buildGrid() {
+    grid.innerHTML = '';
+    for (let r = 0; r < 6; r++) {
+      const row = document.createElement('div');
+      row.className = 'wd-row';
+      for (let c = 0; c < 5; c++) row.appendChild(document.createElement('div')).className = 'wd-cell';
+      grid.appendChild(row);
+    }
+  }
+
+  function buildKb() {
+    const rows = ['qwertyuiop', 'asdfghjkl', '⏎zxcvbnm⌫'];
+    kb.innerHTML = rows.map(r => `<div class="kb-row">${[...r].map(k =>
+      k === '⏎' ? '<button class="wide" data-k="enter">Enter</button>'
+      : k === '⌫' ? '<button class="wide" data-k="back">⌫</button>'
+      : `<button data-k="${k}">${k}</button>`).join('')}</div>`).join('');
+    kb.addEventListener('click', e => { const b = e.target.closest('[data-k]'); if (b) key(b.dataset.k); });
+  }
+
+  function render(animateRow = -1) {
+    const rows = grid.children;
+    const keyState = {};
+    st.guesses.forEach((g, r) => {
+      const res = score(g, st.answer);
+      [...g].forEach((ch, c) => {
+        const cell = rows[r].children[c];
+        cell.textContent = ch;
+        cell.className = 'wd-cell ' + res[c];
+        cell.style.animationDelay = r === animateRow ? `${c * 0.12}s` : '0s';
+        if (r !== animateRow) cell.style.animation = 'none';
+        else cell.style.animation = '';
+        const rank = { g: 3, y: 2, x: 1 };
+        if (!keyState[ch] || rank[res[c]] > rank[keyState[ch]]) keyState[ch] = res[c];
+      });
+    });
+    for (let r = st.guesses.length; r < 6; r++) {
+      [...rows[r].children].forEach((cell, c) => {
+        const ch = r === st.guesses.length ? (typed[c] || '') : '';
+        cell.textContent = ch;
+        cell.className = 'wd-cell' + (ch ? ' filled' : '');
+        cell.style.animation = '';
+      });
+    }
+    $$('button[data-k]', kb).forEach(b => {
+      const s = keyState[b.dataset.k];
+      b.className = (b.classList.contains('wide') ? 'wide ' : '') + (s || '');
+    });
+    $('#wdStats').textContent = stats.played ? `Solved ${stats.wins} · Streak ${stats.streak}` : '';
+    msg.textContent = st.done ? '' : `Guess ${Math.min(st.guesses.length + 1, 6)} of 6`;
+  }
+
+  async function key(k) {
+    if (busy) return;
+    if (st.done) return showEnd();
+    if (k === 'back') typed = typed.slice(0, -1);
+    else if (k === 'enter') return submit();
+    else if (/^[a-z]$/.test(k) && typed.length < 5) typed += k;
+    render();
+  }
+
+  async function submit() {
+    const row = grid.children[st.guesses.length];
+    if (typed.length < 5 || !WORDS.guesses.has(typed)) {
+      toast(typed.length < 5 ? 'Not enough letters' : 'Not in word list');
+      row.classList.remove('shake'); void row.offsetWidth; row.classList.add('shake');
+      return;
+    }
+    st.guesses.push(typed);
+    typed = '';
+    const won = st.guesses[st.guesses.length - 1] === st.answer;
+    if (won || st.guesses.length === 6) {
+      st.done = true; st.won = won;
+      stats.played++;
+      if (won) { stats.wins++; stats.streak++; } else stats.streak = 0;
+      store.set('wordleStats', stats);
+    }
+    save();
+    busy = true;
+    render(st.guesses.length - 1);
+    await sleep(800);
+    busy = false;
+    if (st.done) showEnd();
+  }
+
+  function showEnd() {
+    const praise = ['Genius!', 'Brilliant!', 'Great job!', 'Nice one!', 'Got it!', 'Phew, made it!'];
+    overlay.show(st.won
+      ? `<h2>${praise[st.guesses.length - 1]}</h2><div class="big-word">${st.answer.toUpperCase()}</div><p>Solved in ${st.guesses.length}. Streak: ${stats.streak}</p><button class="big-btn" id="ovNext">Next word</button>`
+      : `<h2>So close</h2><p>The word was</p><div class="big-word">${st.answer.toUpperCase()}</div><button class="big-btn" id="ovNext">Next word</button>`,
+      { '#ovNext': newGame });
+  }
+
+  document.addEventListener('keydown', e => {
+    if (nav.current !== 'wordle' || e.metaKey || e.ctrlKey) return;
+    if (e.key === 'Enter') key('enter');
+    else if (e.key === 'Backspace') key('back');
+    else if (/^[a-zA-Z]$/.test(e.key)) key(e.key.toLowerCase());
+  });
+
+  buildGrid(); buildKb();
+  if (!st) newGame(); else render();
+
+  screens.wordle = {
+    onShow() { render(); if (st.done) showEnd(); },
+    meta: () => stats.played ? `${stats.wins} solved` : '5-letter words',
+  };
+})();
