@@ -614,7 +614,8 @@ body.unicorn .wh-lines polyline { stroke: #ff6bf0; }
 /* ---------- fruit merge ---------- */
 .mg-body { gap: 10px; }
 .mg-next b { font-size: 22px; }
-.mg-stage { position: relative; width: min(94vw, 420px); height: min(62vh, 560px); border-radius: 18px; overflow: hidden; touch-action: none;
+.mg-dog { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; object-position: 75% 15%; border: 2px solid #ffd166; box-shadow: 0 0 10px #ffd166; vertical-align: middle; background: #fff6dc; }
+.mg-stage { position: relative; width: min(94vw, 420px, 46.5vh); aspect-ratio: 3 / 4; border-radius: 18px; overflow: hidden; touch-action: none;
   background: linear-gradient(180deg, #1c2740, #142033 60%, #1b2a20); border: 1px solid var(--line); box-shadow: inset 0 -30px 60px #0006; }
 .mg-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 .mg-chain { display: flex; align-items: center; gap: 1px; flex-wrap: nowrap; }
@@ -799,3 +800,13 @@ body.unicorn .pp-emblem { border-color: #fff; }
 .ac-list b { font-size: 15px; } .ac-list span { color: var(--accent); font-weight: 700; font-size: 13px; margin-left: 4px; }
 .ac-list small { display: block; color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .foot .ver { opacity: .5; font-size: 11px; }
+
+/* ---------- portrait only: phones and tablets turned sideways get asked to turn back ---------- */
+#rotateMsg { display: none; }
+@media (orientation: landscape) and (hover: none) and (pointer: coarse) {
+  body > *:not(#rotateMsg) { visibility: hidden !important; }
+  #rotateMsg { display: flex; position: fixed; inset: 0; z-index: 99999; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+    background: #0b0f17; color: var(--text, #fff); font-size: 18px; text-align: center; visibility: visible !important; }
+  #rotateMsg span { font-size: 56px; animation: rotphone 1.6s ease-in-out infinite; }
+}
+@keyframes rotphone { 0%, 30% { transform: rotate(-90deg); } 60%, 100% { transform: rotate(0deg); } }

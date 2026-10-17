@@ -74,6 +74,10 @@ async function keepAwake() {
 document.addEventListener('visibilitychange', keepAwake);
 keepAwake();
 
+// Portrait only. Installed apps on Android can lock it; everywhere else the CSS asks you to turn the phone back.
+const sideways = matchMedia('(orientation: landscape) and (hover: none) and (pointer: coarse)');
+try { screen.orientation?.lock?.('portrait').catch(() => {}); } catch {}
+
 // Stop iOS pinch zoom (double-tap zoom is handled by touch-action in CSS)
 document.addEventListener('gesturestart', e => e.preventDefault());
 
